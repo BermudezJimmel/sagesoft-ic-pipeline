@@ -27,8 +27,11 @@ CICD-LoadBalancer-Implementation/
 │   └── service-connect-explained.md       │  Beginner-friendly explanation
 │
 ├── 05-implementation-steps/               ← **EXECUTION PHASE**
-│   ├── day1-alb-service-connect.md        │  Day 1: ALB + Service Connect
-│   └── day2-complete-setup.md             │  Day 2: CI/CD + Testing
+│   ├── 🎯 CHOOSE-YOUR-METHOD.md           │  **START HERE** - Console vs CLI
+│   ├── day1-alb-service-connect.md        │  Day 1: CLI method (fast)
+│   ├── day1-console-guide.md              │  Day 1: Console method (visual)
+│   ├── day2-complete-setup.md             │  Day 2: CLI method (fast)
+│   └── day2-console-guide.md              │  Day 2: Console method (visual)
 │
 ├── 06-client-configuration/               ← **CLIENT REQUIREMENTS**
 │   └── client-checklist.md                │  What client must provide

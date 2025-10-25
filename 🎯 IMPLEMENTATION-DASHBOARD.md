@@ -18,10 +18,11 @@
 | [📄 Service Connect Guide](./04-service-connect-guide/service-connect-explained.md) | Explain to client (beginner-friendly) | ✅ Ready |
 
 ### 🛠️ **Implementation Phase**
-| Day | Document | Tasks | Duration |
-|-----|----------|-------|----------|
-| **Day 1** | [📄 ALB + Service Connect](./05-implementation-steps/day1-alb-service-connect.md) | ALB setup, Service Connect config | 4-6 hours |
-| **Day 2** | [📄 Complete Setup](./05-implementation-steps/day2-complete-setup.md) | All services + CI/CD pipelines | 4-6 hours |
+| Method | Day 1 | Day 2 | Best For |
+|--------|-------|-------|----------|
+| **🖱️ Console** | [📄 ALB + Service Connect](./05-implementation-steps/day1-console-guide.md) | [📄 Complete Setup](./05-implementation-steps/day2-console-guide.md) | Beginners, Visual learners |
+| **⌨️ CLI** | [📄 ALB + Service Connect](./05-implementation-steps/day1-alb-service-connect.md) | [📄 Complete Setup](./05-implementation-steps/day2-complete-setup.md) | Fast execution, Professionals |
+| **🎯 Choose** | [📄 Method Selection Guide](./05-implementation-steps/🎯%20CHOOSE-YOUR-METHOD.md) | Compare both approaches | Unsure which to use |
 
 ### 📚 **Reference Materials**
 | Document | Use Case |
