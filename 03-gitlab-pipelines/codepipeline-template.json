@@ -1,0 +1,128 @@
+{
+  "pipeline": {
+    "name": "ic-microservices-api-gateway-pipeline",
+    "roleArn": "arn:aws:iam::795189341938:role/CodePipelineServiceRole",
+    "artifactStore": {
+      "type": "S3",
+      "location": "ic-microservices-codepipeline-artifacts"
+    },
+    "stages": [
+      {
+        "name": "Source",
+        "actions": [
+          {
+            "name": "SourceAction",
+            "actionTypeId": {
+              "category": "Source",
+              "owner": "ThirdParty",
+              "provider": "GitLab",
+              "version": "1"
+            },
+            "configuration": {
+              "GitLabServerUrl": "https://gitlab.com",
+              "RepositoryName": "your-org/api-gateway-repo",
+              "BranchName": "main"
+            },
+            "outputArtifacts": [
+              {
+                "name": "SourceOutput"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Build",
+        "actions": [
+          {
+            "name": "BuildAction",
+            "actionTypeId": {
+              "category": "Build",
+              "owner": "AWS",
+              "provider": "CodeBuild",
+              "version": "1"
+            },
+            "configuration": {
+              "ProjectName": "ic-microservices-build-project"
+            },
+            "inputArtifacts": [
+              {
+                "name": "SourceOutput"
+              }
+            ],
+            "outputArtifacts": [
+              {
+                "name": "BuildOutput"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Deploy-Staging",
+        "actions": [
+          {
+            "name": "DeployStaging",
+            "actionTypeId": {
+              "category": "Deploy",
+              "owner": "AWS",
+              "provider": "ECS",
+              "version": "1"
+            },
+            "configuration": {
+              "ClusterName": "ic-microservices-cluster",
+              "ServiceName": "api-gateway-staging",
+              "FileName": "imagedefinitions.json"
+            },
+            "inputArtifacts": [
+              {
+                "name": "BuildOutput"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Approval",
+        "actions": [
+          {
+            "name": "ManualApproval",
+            "actionTypeId": {
+              "category": "Approval",
+              "owner": "AWS",
+              "provider": "Manual",
+              "version": "1"
+            },
+            "configuration": {
+              "CustomData": "Please review staging deployment and approve for production"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Deploy-Production",
+        "actions": [
+          {
+            "name": "DeployProduction",
+            "actionTypeId": {
+              "category": "Deploy",
+              "owner": "AWS",
+              "provider": "ECS",
+              "version": "1"
+            },
+            "configuration": {
+              "ClusterName": "ic-microservices-cluster",
+              "ServiceName": "api-gateway-prod",
+              "FileName": "imagedefinitions.json"
+            },
+            "inputArtifacts": [
+              {
+                "name": "BuildOutput"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
