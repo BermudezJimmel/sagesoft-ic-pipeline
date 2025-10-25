@@ -33,6 +33,9 @@ CICD-LoadBalancer-Implementation/
 ├── 06-client-configuration/               ← **CLIENT REQUIREMENTS**
 │   └── client-checklist.md                │  What client must provide
 │
+├── 07-application-code-updates/           ← **CODE CHANGES** 
+│   └── code-migration-guide.md            │  **CRITICAL:** Client must update service URLs
+│
 └── implementation-checklist.md            ← **PROGRESS TRACKING**
 ```
 

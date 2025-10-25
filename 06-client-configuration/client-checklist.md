@@ -61,7 +61,17 @@ RANDOM_SUFFIX → unique-suffix-for-s3-bucket
 
 ## Post-Implementation - Client Configuration
 
-### 1. GitLab Repository Setup
+### 1. Application Code Updates (CRITICAL)
+**Client must update service URLs in their code - see:** [Application Code Updates Guide](../07-application-code-updates/code-migration-guide.md)
+
+**Quick Summary:**
+```javascript
+// Replace hardcoded IPs with Service Connect DNS names
+// Before: "http://54.123.45.67:8001"  
+// After:  "http://auth-service.local:8001"
+```
+
+### 2. GitLab Repository Setup
 Each repository needs `buildspec.yml` in root:
 ```yaml
 version: 0.2

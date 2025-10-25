@@ -28,6 +28,7 @@
 |----------|----------|
 | [📄 CodePipeline Template](./03-gitlab-pipelines/codepipeline-template.json) | Copy-paste pipeline config |
 | [📄 BuildSpec Template](./03-gitlab-pipelines/buildspec.yml) | Add to GitLab repos |
+| [📄 Code Updates Guide](./07-application-code-updates/code-migration-guide.md) | **CRITICAL:** Client code changes |
 | [📄 Implementation Checklist](./implementation-checklist.md) | Track progress |
 
 ---
