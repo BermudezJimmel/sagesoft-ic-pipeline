@@ -1,5 +1,20 @@
 # Day 1: ALB + Service Connect Implementation
 
+## Step 0: Create IAM Roles (15 minutes) - **REQUIRED FIRST**
+
+**⚠️ IMPORTANT:** Create IAM roles before task definitions!
+
+See detailed guide: [IAM Roles Creation](../08-iam-roles-setup/iam-roles-creation.md)
+
+**Quick commands:**
+```bash
+# Create API Gateway staging roles
+aws iam create-role --role-name ic-apigateway-staging-execution-role --assume-role-policy-document '{...}'
+aws iam create-role --role-name ic-apigateway-staging-task-role --assume-role-policy-document '{...}'
+
+# Attach required policies (see full guide for complete commands)
+```
+
 ## Step 1: Create Service Discovery Namespace (10 minutes)
 
 ```bash
@@ -51,14 +66,14 @@ aws elbv2 create-listener \
 
 ## Step 3: Update API Gateway Task Definition (20 minutes)
 
-Create file: `api-gateway-task-definition.json`
+Create file: `ic-apigateway-staging-task-definition.json`
 
 ```json
 {
-  "family": "api-gateway-task",
+  "family": "ic-apigateway-staging-task",
   "networkMode": "awsvpc",
-  "executionRoleArn": "arn:aws:iam::795189341938:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::795189341938:role/ecsTaskRole",
+  "executionRoleArn": "arn:aws:iam::795189341938:role/ic-apigateway-staging-execution-role",
+  "taskRoleArn": "arn:aws:iam::795189341938:role/ic-apigateway-staging-task-role",
   "containerDefinitions": [
     {
       "name": "api-gateway",
@@ -90,7 +105,7 @@ Create file: `api-gateway-task-definition.json`
       "environment": [
         {
           "name": "DB_SCHEMA",
-          "value": "REPLACE_WITH_SCHEMA_NAME"
+          "value": "staging_employees"
         },
         {
           "name": "AUTH_SERVICE_URL",
@@ -109,7 +124,7 @@ Create file: `api-gateway-task-definition.json`
         "logDriver": "awslogs",
         "options": {
           "awslogs-create-group": "true",
-          "awslogs-group": "/ecs/api-gateway",
+          "awslogs-group": "/ecs/ic-apigateway-staging",
           "awslogs-region": "ap-southeast-1",
           "awslogs-stream-prefix": "ecs"
         }
@@ -125,7 +140,7 @@ Create file: `api-gateway-task-definition.json`
 Register the task definition:
 ```bash
 aws ecs register-task-definition \
-  --cli-input-json file://api-gateway-task-definition.json \
+  --cli-input-json file://ic-apigateway-staging-task-definition.json \
   --region ap-southeast-1
 ```
 
@@ -136,7 +151,7 @@ aws ecs register-task-definition \
 aws ecs update-service \
   --cluster REPLACE_WITH_YOUR_CLUSTER_NAME \
   --service REPLACE_WITH_API_GATEWAY_SERVICE_NAME \
-  --task-definition api-gateway-task \
+  --task-definition ic-apigateway-staging-task \
   --service-connect-configuration '{
     "enabled": true,
     "namespace": "REPLACE_WITH_NAMESPACE_ID_FROM_STEP1",

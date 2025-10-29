@@ -39,6 +39,9 @@ CICD-LoadBalancer-Implementation/
 ├── 07-application-code-updates/           ← **CODE CHANGES** 
 │   └── code-migration-guide.md            │  **CRITICAL:** Client must update service URLs
 │
+├── 08-iam-roles-setup/                    ← **IAM ROLES** 
+│   └── iam-roles-creation.md              │  **REQUIRED FIRST:** Create IAM roles
+│
 └── implementation-checklist.md            ← **PROGRESS TRACKING**
 ```
 

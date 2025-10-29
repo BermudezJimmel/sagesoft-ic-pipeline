@@ -6,6 +6,24 @@ Choose this method if you prefer clicking through the AWS web interface instead 
 
 ---
 
+## Step 0: Create IAM Roles (20 minutes) - **REQUIRED FIRST**
+
+**⚠️ IMPORTANT:** Create IAM roles before task definitions!
+
+### **Console Steps:**
+1. **Go to:** AWS Console → **IAM** → **Roles**
+2. **Click:** "Create role"
+3. **Select:** "AWS service" → "Elastic Container Service" → "Elastic Container Service Task"
+4. **Role name:** `ic-apigateway-staging-execution-role`
+5. **Attach policies:**
+   - `AmazonECSTaskExecutionRolePolicy`
+   - `SecretsManagerReadWrite`
+6. **Repeat for task role:** `ic-apigateway-staging-task-role`
+
+**For complete steps:** [IAM Roles Creation Guide](../08-iam-roles-setup/iam-roles-creation.md)
+
+---
+
 ## Step 1: Create Service Discovery Namespace (10 minutes)
 
 ### **AWS Console Steps:**
