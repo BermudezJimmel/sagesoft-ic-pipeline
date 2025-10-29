@@ -119,6 +119,10 @@ Both methods achieve the **exact same result** - the choice is purely about your
 
 ## 📋 **Prerequisites for Each Method**
 
+### **⚠️ BOTH Methods Require (DO THIS FIRST):**
+- ✅ **IAM Roles Created** - See [IAM Roles Setup Guide](../08-iam-roles-setup/iam-roles-creation.md)
+- ✅ **Copy-paste ready commands** - No JSON errors, complete commands provided
+
 ### **Console Method Prerequisites:**
 - ✅ AWS Console access with appropriate permissions
 - ✅ Web browser

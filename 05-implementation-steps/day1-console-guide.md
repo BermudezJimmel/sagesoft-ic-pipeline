@@ -10,17 +10,37 @@ Choose this method if you prefer clicking through the AWS web interface instead 
 
 **⚠️ IMPORTANT:** Create IAM roles before task definitions!
 
-### **Console Steps:**
+### **Console Steps for API Gateway Staging:**
 1. **Go to:** AWS Console → **IAM** → **Roles**
 2. **Click:** "Create role"
 3. **Select:** "AWS service" → "Elastic Container Service" → "Elastic Container Service Task"
 4. **Role name:** `ic-apigateway-staging-execution-role`
 5. **Attach policies:**
-   - `AmazonECSTaskExecutionRolePolicy`
-   - `SecretsManagerReadWrite`
-6. **Repeat for task role:** `ic-apigateway-staging-task-role`
+   - Search and select: `AmazonECSTaskExecutionRolePolicy`
+   - Search and select: `SecretsManagerReadWrite`
+6. **Click:** "Create role"
 
-**For complete steps:** [IAM Roles Creation Guide](../08-iam-roles-setup/iam-roles-creation.md)
+7. **Repeat for task role:**
+   - **Role name:** `ic-apigateway-staging-task-role`
+   - **Create custom policy:** 
+     ```json
+     {
+       "Version": "2012-10-17",
+       "Statement": [
+         {
+           "Effect": "Allow",
+           "Action": [
+             "s3:GetObject",
+             "s3:PutObject",
+             "secretsmanager:GetSecretValue"
+           ],
+           "Resource": "*"
+         }
+       ]
+     }
+     ```
+
+**⚡ Faster Method:** Use CLI commands from [IAM Roles Creation Guide](../08-iam-roles-setup/iam-roles-creation.md)
 
 ---
 

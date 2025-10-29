@@ -4,16 +4,79 @@
 
 **⚠️ IMPORTANT:** Create IAM roles before task definitions!
 
-See detailed guide: [IAM Roles Creation](../08-iam-roles-setup/iam-roles-creation.md)
-
-**Quick commands:**
+### **Quick Commands for API Gateway Staging:**
 ```bash
-# Create API Gateway staging roles
-aws iam create-role --role-name ic-apigateway-staging-execution-role --assume-role-policy-document '{...}'
-aws iam create-role --role-name ic-apigateway-staging-task-role --assume-role-policy-document '{...}'
+# Create execution role
+aws iam create-role \
+  --role-name ic-apigateway-staging-execution-role \
+  --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "ecs-tasks.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  }' \
+  --region ap-southeast-1
 
-# Attach required policies (see full guide for complete commands)
+# Attach execution policies
+aws iam attach-role-policy \
+  --role-name ic-apigateway-staging-execution-role \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy \
+  --region ap-southeast-1
+
+aws iam attach-role-policy \
+  --role-name ic-apigateway-staging-execution-role \
+  --policy-arn arn:aws:iam::aws:policy/SecretsManagerReadWrite \
+  --region ap-southeast-1
+
+# Create task role
+aws iam create-role \
+  --role-name ic-apigateway-staging-task-role \
+  --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "ecs-tasks.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  }' \
+  --region ap-southeast-1
+
+# Create and attach task policy
+aws iam create-policy \
+  --policy-name ic-apigateway-staging-task-policy \
+  --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:GetObject",
+          "s3:PutObject",
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }' \
+  --region ap-southeast-1
+
+aws iam attach-role-policy \
+  --role-name ic-apigateway-staging-task-role \
+  --policy-arn arn:aws:iam::795189341938:policy/ic-apigateway-staging-task-policy \
+  --region ap-southeast-1
 ```
+
+**For all services:** See complete guide: [IAM Roles Creation](../08-iam-roles-setup/iam-roles-creation.md)
 
 ## Step 1: Create Service Discovery Namespace (10 minutes)
 

@@ -26,6 +26,21 @@ EMP (Amplify) → ALB (HTTPS) → API Gateway → Service Connect → {AUTH, COR
 
 ## ⚡ **Key Implementation Commands**
 
+### **Step 0: IAM Roles (REQUIRED FIRST)**
+```bash
+# Create API Gateway staging execution role
+aws iam create-role --role-name ic-apigateway-staging-execution-role --assume-role-policy-document '{
+  "Version": "2012-10-17",
+  "Statement": [{"Effect": "Allow", "Principal": {"Service": "ecs-tasks.amazonaws.com"}, "Action": "sts:AssumeRole"}]
+}'
+
+# Create API Gateway staging task role  
+aws iam create-role --role-name ic-apigateway-staging-task-role --assume-role-policy-document '{
+  "Version": "2012-10-17", 
+  "Statement": [{"Effect": "Allow", "Principal": {"Service": "ecs-tasks.amazonaws.com"}, "Action": "sts:AssumeRole"}]
+}'
+```
+
 ### **Day 1: ALB + Service Connect**
 ```bash
 # 1. Create Service Discovery

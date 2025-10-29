@@ -16,7 +16,7 @@
 | [📄 Architecture Decisions](./00-architecture-decisions/final-architecture.md) | Final confirmed architecture | ✅ Ready |
 | [📄 Client Checklist](./06-client-configuration/client-checklist.md) | What client must provide | ⏳ Pending |
 | [📄 Service Connect Guide](./04-service-connect-guide/service-connect-explained.md) | Explain to client (beginner-friendly) | ✅ Ready |
-| [🔐 IAM Roles Setup](./08-iam-roles-setup/iam-roles-creation.md) | **REQUIRED FIRST** - Create IAM roles | ⚠️ Must do before Day 1 |
+| [🔐 IAM Roles Setup](./08-iam-roles-setup/iam-roles-creation.md) | **STEP 0** - Copy-paste IAM commands | ⚠️ **DO THIS FIRST** |
 
 ### 🛠️ **Implementation Phase**
 | Method | Day 1 | Day 2 | Best For |
