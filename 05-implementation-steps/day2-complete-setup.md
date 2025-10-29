@@ -72,7 +72,7 @@ aws ecs register-task-definition \
   --region ap-southeast-1
 
 aws ecs update-service \
-  --cluster REPLACE_WITH_YOUR_CLUSTER_NAME \
+  --cluster ic-general-services-cluster \
   --service REPLACE_WITH_AUTH_SERVICE_NAME \
   --task-definition ic-auth-staging-task \
   --service-connect-configuration '{

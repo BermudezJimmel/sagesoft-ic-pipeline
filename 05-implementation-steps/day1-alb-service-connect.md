@@ -81,16 +81,16 @@ aws iam attach-role-policy \
 ## Step 1: Create ECS Cluster (5 minutes)
 
 ```bash
-# Create ECS cluster for IC microservices
+# Create ECS cluster for IC general services
 aws ecs create-cluster \
-  --cluster-name ic-microservices-cluster \
+  --cluster-name ic-general-services-cluster \
   --capacity-providers FARGATE \
   --default-capacity-provider-strategy capacityProvider=FARGATE,weight=1 \
   --region ap-southeast-1
 
 # Verify cluster creation
 aws ecs describe-clusters \
-  --clusters ic-microservices-cluster \
+  --clusters ic-general-services-cluster \
   --region ap-southeast-1
 ```
 
@@ -291,7 +291,7 @@ aws ecs register-task-definition \
 ```bash
 # Create API Gateway ECS service with Service Connect and ALB
 aws ecs create-service \
-  --cluster ic-microservices-cluster \
+  --cluster ic-general-services-cluster \
   --service-name ic-apigateway-staging \
   --task-definition ic-apigateway-staging-task \
   --desired-count 1 \
@@ -330,7 +330,7 @@ aws ecs create-service \
 
 # Verify service creation
 aws ecs describe-services \
-  --cluster ic-microservices-cluster \
+  --cluster ic-general-services-cluster \
   --services ic-apigateway-staging \
   --region ap-southeast-1
 ```
