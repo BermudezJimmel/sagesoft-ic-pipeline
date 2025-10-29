@@ -78,7 +78,23 @@ aws iam attach-role-policy \
 
 **For all services:** See complete guide: [IAM Roles Creation](../08-iam-roles-setup/iam-roles-creation.md)
 
-## Step 1: Create Service Discovery Namespace (10 minutes)
+## Step 1: Create ECS Cluster (5 minutes)
+
+```bash
+# Create ECS cluster for IC microservices
+aws ecs create-cluster \
+  --cluster-name ic-microservices-cluster \
+  --capacity-providers FARGATE \
+  --default-capacity-provider-strategy capacityProvider=FARGATE,weight=1 \
+  --region ap-southeast-1
+
+# Verify cluster creation
+aws ecs describe-clusters \
+  --clusters ic-microservices-cluster \
+  --region ap-southeast-1
+```
+
+## Step 2: Create Service Discovery Namespace (10 minutes)
 
 ```bash
 # Create private DNS namespace for Service Connect
@@ -270,17 +286,26 @@ aws ecs register-task-definition \
   --region ap-southeast-1
 ```
 
-## Step 4: Update API Gateway ECS Service with Service Connect (15 minutes)
+## Step 5: Create API Gateway ECS Service with Service Connect (20 minutes)
 
 ```bash
-# Update existing API Gateway service to use Service Connect and ALB
-aws ecs update-service \
-  --cluster REPLACE_WITH_YOUR_CLUSTER_NAME \
-  --service REPLACE_WITH_API_GATEWAY_SERVICE_NAME \
+# Create API Gateway ECS service with Service Connect and ALB
+aws ecs create-service \
+  --cluster ic-microservices-cluster \
+  --service-name ic-apigateway-staging \
   --task-definition ic-apigateway-staging-task \
+  --desired-count 1 \
+  --capacity-provider-strategy capacityProvider=FARGATE,weight=1 \
+  --network-configuration '{
+    "awsvpcConfiguration": {
+      "subnets": ["subnet-096a5e3c10eef5f5c", "subnet-0e9a0ec15dc80197d"],
+      "securityGroups": ["sg-0bcd67a1053a4e84a"],
+      "assignPublicIp": "DISABLED"
+    }
+  }' \
   --service-connect-configuration '{
     "enabled": true,
-    "namespace": "REPLACE_WITH_NAMESPACE_ID_FROM_STEP1",
+    "namespace": "REPLACE_WITH_NAMESPACE_ID_FROM_STEP2",
     "services": [
       {
         "portName": "ic-api-gateway-port",
@@ -296,36 +321,49 @@ aws ecs update-service \
   }' \
   --load-balancers '[
     {
-      "targetGroupArn": "arn:aws:elasticloadbalancing:ap-southeast-1:795189341938:targetgroup/api-gateway-tg/REPLACE_WITH_TG_ID",
+      "targetGroupArn": "arn:aws:elasticloadbalancing:ap-southeast-1:795189341938:targetgroup/ic-apigateway-staging-tg/92e300ce623f18bf",
       "containerName": "ic-api-gateway-container",
       "containerPort": 8000
     }
   ]' \
   --region ap-southeast-1
+
+# Verify service creation
+aws ecs describe-services \
+  --cluster ic-microservices-cluster \
+  --services ic-apigateway-staging \
+  --region ap-southeast-1
 ```
 
-## Step 5: Test ALB Connection (10 minutes)
+## Step 6: Test ALB Connection (10 minutes)
 
 ```bash
 # Get ALB DNS name
 aws elbv2 describe-load-balancers \
-  --names ic-microservices-alb \
+  --names ic-apigateway-staging-lb \
   --query 'LoadBalancers[0].DNSName' \
   --output text \
   --region ap-southeast-1
 
 # Test HTTPS connection (replace with actual ALB DNS name)
-curl -k https://ic-microservices-alb-123456789.ap-southeast-1.elb.amazonaws.com
+curl -k https://YOUR_ALB_DNS_NAME_FROM_ABOVE_COMMAND
 
-# Expected: Response from API Gateway service
+# Check target group health
+aws elbv2 describe-target-health \
+  --target-group-arn arn:aws:elasticloadbalancing:ap-southeast-1:795189341938:targetgroup/ic-apigateway-staging-tg/92e300ce623f18bf \
+  --region ap-southeast-1
+
+# Expected: Target should show "healthy" status
 ```
 
 ## Day 1 Completion Checklist
+- ✅ IAM roles created for API Gateway staging
+- ✅ ECS cluster `ic-microservices-cluster` created
 - ✅ Service Discovery namespace created
-- ✅ ALB created with SSL certificate
+- ✅ Application Load Balancer created with SSL certificate
 - ✅ Target group created with TCP health checks
-- ✅ API Gateway task definition updated with Service Connect
-- ✅ API Gateway service updated and connected to ALB
+- ✅ API Gateway task definition registered
+- ✅ API Gateway ECS service created with Service Connect and ALB
 - ✅ HTTPS connection working through ALB
 
-**Next:** Day 2 - Complete Service Connect for all services + CI/CD setup
+**Next:** Day 2 - Create remaining services (AUTH, CORE, FILES) + CI/CD setup
