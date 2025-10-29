@@ -13,22 +13,27 @@ Complete the remaining services and set up CI/CD pipelines using AWS Console.
 2. **Find:** AUTH task definition → **Create new revision**
 3. **Update Container:**
    - **Port Mappings:** Add name `auth-port`, port 8001
-   - **Environment Variables:** Add Service Connect URLs
+   - **Environment Variables:** 
+     - `DB_SCHEMA = staging_employees`
+     - `CORE_SERVICE_URL = http://core-service.local:8002`
    - **Secrets:** Add database credentials (same as API Gateway)
-4. **Click:** "Create"
+4. **Update IAM Roles:**
+   - **Task execution role:** `ic-auth-staging-execution-role`
+   - **Task role:** `ic-auth-staging-task-role`
+5. **Click:** "Create"
 
 ### **Update ECS Service:**
-5. **Go to:** **ECS** → **Clusters** → Your cluster → **Services**
-6. **Find:** AUTH service → **Update service**
-7. **Task Definition:** Select latest AUTH revision
-8. **Service Connect Configuration:**
+6. **Go to:** **ECS** → **Clusters** → Your cluster → **Services**
+7. **Find:** AUTH service → **Update service**
+8. **Task Definition:** Select latest AUTH revision (`ic-auth-staging-task`)
+9. **Service Connect Configuration:**
    - **Enable Service Connect:** ✅
    - **Namespace:** `ic-microservices`
    - **Port name:** `auth-port`
    - **Discovery name:** `auth-service`
    - **DNS name:** `auth-service.local`
    - **Port:** 8001
-9. **Click:** "Update service"
+10. **Click:** "Update service"
 
 ---
 

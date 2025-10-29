@@ -2,14 +2,14 @@
 
 ## Step 1: Update AUTH Service Task Definition (15 minutes)
 
-Create file: `auth-task-definition.json`
+Create file: `ic-auth-staging-task-definition.json`
 
 ```json
 {
-  "family": "auth-task",
+  "family": "ic-auth-staging-task",
   "networkMode": "awsvpc",
-  "executionRoleArn": "arn:aws:iam::795189341938:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::795189341938:role/ecsTaskRole",
+  "executionRoleArn": "arn:aws:iam::795189341938:role/ic-auth-staging-execution-role",
+  "taskRoleArn": "arn:aws:iam::795189341938:role/ic-auth-staging-task-role",
   "containerDefinitions": [
     {
       "name": "auth",
@@ -41,13 +41,235 @@ Create file: `auth-task-definition.json`
       "environment": [
         {
           "name": "DB_SCHEMA",
-          "value": "REPLACE_WITH_SCHEMA_NAME"
+          "value": "staging_employees"
         },
         {
           "name": "CORE_SERVICE_URL",
           "value": "http://core-service.local:8002"
         }
       ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/ic-auth-staging",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512"
+}
+```
+
+Register the task definition:
+```bash
+aws ecs register-task-definition \
+  --cli-input-json file://ic-auth-staging-task-definition.json \
+  --region ap-southeast-1
+
+aws ecs update-service \
+  --cluster REPLACE_WITH_YOUR_CLUSTER_NAME \
+  --service REPLACE_WITH_AUTH_SERVICE_NAME \
+  --task-definition ic-auth-staging-task \
+  --service-connect-configuration '{
+    "enabled": true,
+    "namespace": "REPLACE_WITH_NAMESPACE_ID",
+    "services": [
+      {
+        "portName": "auth-port",
+        "discoveryName": "auth-service",
+        "clientAliases": [
+          {
+            "port": 8001,
+            "dnsName": "auth-service.local"
+          }
+        ]
+      }
+    ]
+  }' \
+  --region ap-southeast-1
+```
+
+## Step 2: Update CORE and FILES Services (20 minutes)
+
+**CORE Service Task Definition:** `ic-core-staging-task-definition.json`
+```json
+{
+  "family": "ic-core-staging-task",
+  "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::795189341938:role/ic-core-staging-execution-role",
+  "taskRoleArn": "arn:aws:iam::795189341938:role/ic-core-staging-task-role",
+  "containerDefinitions": [
+    {
+      "name": "core",
+      "image": "795189341938.dkr.ecr.ap-southeast-1.amazonaws.com/core:latest",
+      "memory": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [
+        {
+          "name": "core-port",
+          "containerPort": 8002,
+          "protocol": "tcp"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DB_HOST",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:host::"
+        },
+        {
+          "name": "DB_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:username::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:password::"
+        }
+      ],
+      "environment": [
+        {
+          "name": "DB_SCHEMA",
+          "value": "staging_employees"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/ic-core-staging",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512"
+}
+```
+
+**FILES Service Task Definition:** `ic-files-staging-task-definition.json`
+```json
+{
+  "family": "ic-files-staging-task",
+  "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::795189341938:role/ic-files-staging-execution-role",
+  "taskRoleArn": "arn:aws:iam::795189341938:role/ic-files-staging-task-role",
+  "containerDefinitions": [
+    {
+      "name": "files",
+      "image": "795189341938.dkr.ecr.ap-southeast-1.amazonaws.com/files:latest",
+      "memory": 512,
+      "cpu": 256,
+      "essential": true,
+      "portMappings": [
+        {
+          "name": "files-port",
+          "containerPort": 8003,
+          "protocol": "tcp"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DB_HOST",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:host::"
+        },
+        {
+          "name": "DB_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:username::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:password::"
+        }
+      ],
+      "environment": [
+        {
+          "name": "DB_SCHEMA",
+          "value": "staging_employees"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/ic-files-staging",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512"
+}
+```
+
+**Register and Update Services:**
+```bash
+# Register CORE task definition
+aws ecs register-task-definition \
+  --cli-input-json file://ic-core-staging-task-definition.json \
+  --region ap-southeast-1
+
+# Update CORE service
+aws ecs update-service \
+  --cluster REPLACE_WITH_YOUR_CLUSTER_NAME \
+  --service REPLACE_WITH_CORE_SERVICE_NAME \
+  --task-definition ic-core-staging-task \
+  --service-connect-configuration '{
+    "enabled": true,
+    "namespace": "REPLACE_WITH_NAMESPACE_ID",
+    "services": [
+      {
+        "portName": "core-port",
+        "discoveryName": "core-service",
+        "clientAliases": [
+          {
+            "port": 8002,
+            "dnsName": "core-service.local"
+          }
+        ]
+      }
+    ]
+  }' \
+  --region ap-southeast-1
+
+# Register FILES task definition
+aws ecs register-task-definition \
+  --cli-input-json file://ic-files-staging-task-definition.json \
+  --region ap-southeast-1
+
+# Update FILES service
+aws ecs update-service \
+  --cluster REPLACE_WITH_YOUR_CLUSTER_NAME \
+  --service REPLACE_WITH_FILES_SERVICE_NAME \
+  --task-definition ic-files-staging-task \
+  --service-connect-configuration '{
+    "enabled": true,
+    "namespace": "REPLACE_WITH_NAMESPACE_ID",
+    "services": [
+      {
+        "portName": "files-port",
+        "discoveryName": "files-service",
+        "clientAliases": [
+          {
+            "port": 8003,
+            "dnsName": "files-service.local"
+          }
+        ]
+      }
+    ]
+  }' \
+  --region ap-southeast-1
+```
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {

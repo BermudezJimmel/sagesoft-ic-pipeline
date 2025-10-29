@@ -1,6 +1,6 @@
 {
   "pipeline": {
-    "name": "ic-microservices-api-gateway-pipeline",
+    "name": "ic-microservices-apigateway-pipeline",
     "roleArn": "arn:aws:iam::795189341938:role/CodePipelineServiceRole",
     "artifactStore": {
       "type": "S3",
@@ -20,7 +20,7 @@
             },
             "configuration": {
               "GitLabServerUrl": "https://gitlab.com",
-              "RepositoryName": "your-org/api-gateway-repo",
+              "RepositoryName": "CLIENT_TO_REPLACE/api-gateway-repo",
               "BranchName": "main"
             },
             "outputArtifacts": [
@@ -43,7 +43,7 @@
               "version": "1"
             },
             "configuration": {
-              "ProjectName": "ic-microservices-build-project"
+              "ProjectName": "ic-microservices-build-apigateway"
             },
             "inputArtifacts": [
               {
@@ -70,8 +70,8 @@
               "version": "1"
             },
             "configuration": {
-              "ClusterName": "ic-microservices-cluster",
-              "ServiceName": "api-gateway-staging",
+              "ClusterName": "REPLACE_WITH_CLUSTER_NAME",
+              "ServiceName": "ic-apigateway-staging",
               "FileName": "imagedefinitions.json"
             },
             "inputArtifacts": [
@@ -111,8 +111,8 @@
               "version": "1"
             },
             "configuration": {
-              "ClusterName": "ic-microservices-cluster",
-              "ServiceName": "api-gateway-prod",
+              "ClusterName": "REPLACE_WITH_CLUSTER_NAME",
+              "ServiceName": "ic-apigateway-prod",
               "FileName": "imagedefinitions.json"
             },
             "inputArtifacts": [
