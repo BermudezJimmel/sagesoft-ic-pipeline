@@ -1,60 +1,57 @@
 # 🔧 Application Code Updates Guide
 
-## 📋 **What Client Must Update in Their Code**
+## 📋 **What Client Must Update**
 
-After Service Connect implementation, the client needs to update service URLs in their application code.
+### **🎯 Client's Architecture Understanding:**
+- ✅ **API Gateway stores microservice URLs in database** (not environment variables)
+- ✅ **API Gateway reads URLs from database at runtime**
+- ✅ **Database must be updated with Service Connect URLs**
+- ✅ **No code changes needed** - only database updates
 
 ---
 
-## 🔍 **Step 1: Find Current Hardcoded IPs**
+## 🗄️ **Database Updates Required (CRITICAL)**
 
-### **Look for these patterns in API Gateway code:**
-```javascript
-// ❌ Examples of what to find and replace
-const authUrl = "http://54.123.45.67:8001";
-const coreUrl = "http://10.0.1.100:8002";
-const filesUrl = "http://172.31.45.89:8003";
+**Primary Task:** Update database with Service Connect URLs
 
-// Or in configuration files
-"AUTH_SERVICE": "http://54.123.45.67:8001"
-"CORE_SERVICE": "http://10.0.1.100:8002"
+See complete guide: [Database Updates for Service Connect](../09-database-updates/service-connect-database-migration.md)
+
+### **Quick Summary:**
+```sql
+-- Example updates (client to customize)
+UPDATE microservices_config SET 
+  url = 'http://auth-service.local:8001' 
+WHERE service_name = 'auth';
+
+UPDATE microservices_config SET 
+  url = 'http://core-service.local:8002' 
+WHERE service_name = 'core';
+
+UPDATE microservices_config SET 
+  url = 'http://files-service.local:8003' 
+WHERE service_name = 'files';
 ```
 
-### **Common locations:**
-- Environment variables (`.env` files)
-- Configuration files (`config.json`, `settings.js`)
-- Direct in code (API routes, HTTP clients)
-- Docker environment variables
-
 ---
 
-## ✅ **Step 2: Replace with Service Connect URLs**
+## 🔍 **Optional: Code Updates for Other Services**
 
-### **Environment Variables (Recommended Approach)**
+If AUTH, CORE, or FILES services need to call each other directly:
+
+### **Environment Variables (For Non-API Gateway Services)**
 ```bash
-# Before (in .env or Docker environment)
-AUTH_SERVICE_URL=http://54.123.45.67:8001
-CORE_SERVICE_URL=http://10.0.1.100:8002
-FILES_SERVICE_URL=http://172.31.45.89:8003
-
-# After (Service Connect DNS names)
-AUTH_SERVICE_URL=http://auth-service.local:8001
+# In AUTH service .env or config
 CORE_SERVICE_URL=http://core-service.local:8002
+FILES_SERVICE_URL=http://files-service.local:8003
+
+# In CORE service .env or config  
+AUTH_SERVICE_URL=http://auth-service.local:8001
 FILES_SERVICE_URL=http://files-service.local:8003
 ```
 
 ### **Configuration Files**
 ```json
-// Before
-{
-  "services": {
-    "auth": "http://54.123.45.67:8001",
-    "core": "http://10.0.1.100:8002",
-    "files": "http://172.31.45.89:8003"
-  }
-}
-
-// After
+// config.json for microservices
 {
   "services": {
     "auth": "http://auth-service.local:8001",
@@ -62,17 +59,6 @@ FILES_SERVICE_URL=http://files-service.local:8003
     "files": "http://files-service.local:8003"
   }
 }
-```
-
-### **Direct Code Updates**
-```javascript
-// Before
-axios.get('http://54.123.45.67:8001/validate-token')
-fetch('http://10.0.1.100:8002/user-data')
-
-// After  
-axios.get('http://auth-service.local:8001/validate-token')
-fetch('http://core-service.local:8002/user-data')
 ```
 
 ---

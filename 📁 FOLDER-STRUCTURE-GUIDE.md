@@ -42,6 +42,9 @@ CICD-LoadBalancer-Implementation/
 ├── 08-iam-roles-setup/                    ← **IAM ROLES** 
 │   └── iam-roles-creation.md              │  **REQUIRED FIRST:** Create IAM roles
 │
+├── 09-database-updates/                   ← **DATABASE MIGRATION** 
+│   └── service-connect-database-migration.md │  **CRITICAL:** Update Service Connect URLs in DB
+│
 └── implementation-checklist.md            ← **PROGRESS TRACKING**
 ```
 

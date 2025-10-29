@@ -17,6 +17,7 @@
 | [📄 Client Checklist](./06-client-configuration/client-checklist.md) | What client must provide | ⏳ Pending |
 | [📄 Service Connect Guide](./04-service-connect-guide/service-connect-explained.md) | Explain to client (beginner-friendly) | ✅ Ready |
 | [🔐 IAM Roles Setup](./08-iam-roles-setup/iam-roles-creation.md) | **STEP 0** - Copy-paste IAM commands | ⚠️ **DO THIS FIRST** |
+| [🗄️ Database Updates](./09-database-updates/service-connect-database-migration.md) | **CRITICAL** - Update URLs in database | ⚠️ **REQUIRED** |
 
 ### 🛠️ **Implementation Phase**
 | Method | Day 1 | Day 2 | Best For |

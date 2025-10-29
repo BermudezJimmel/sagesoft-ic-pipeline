@@ -61,15 +61,26 @@ RANDOM_SUFFIX → unique-suffix-for-s3-bucket
 
 ## Post-Implementation - Client Configuration
 
-### 1. Application Code Updates (CRITICAL)
-**Client must update service URLs in their code - see:** [Application Code Updates Guide](../07-application-code-updates/code-migration-guide.md)
+### 1. Database Updates (CRITICAL - REQUIRED)
+**Client MUST update microservice URLs in database - see:** [Database Updates Guide](../09-database-updates/service-connect-database-migration.md)
 
-**Quick Summary:**
-```javascript
-// Replace hardcoded IPs with Service Connect DNS names
-// Before: "http://54.123.45.67:8001"  
-// After:  "http://auth-service.local:8001"
+**Client Must Provide:**
+- Database table name where URLs are stored
+- Column names (service identifier, URL column)
+- Current service identifiers in database
+- Sample current data structure
+
+**Database Update Example:**
+```sql
+UPDATE microservices_config SET 
+  url = 'http://auth-service.local:8001' 
+WHERE service_name = 'auth';
 ```
+
+### 2. Application Code Updates (Optional)
+**Only needed for non-API Gateway services - see:** [Application Code Updates Guide](../07-application-code-updates/code-migration-guide.md)
+
+**Note:** API Gateway reads URLs from database, so no code changes needed for API Gateway.
 
 ### 2. GitLab Repository Setup
 Each repository needs `buildspec.yml` in root:

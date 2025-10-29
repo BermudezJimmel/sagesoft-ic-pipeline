@@ -129,6 +129,9 @@ aws elbv2 create-listener \
 
 ## Step 3: Update API Gateway Task Definition (20 minutes)
 
+**⚠️ IMPORTANT:** Client's API Gateway reads microservice URLs from **database**, not environment variables.
+See: [Database Updates Guide](../09-database-updates/service-connect-database-migration.md)
+
 Create file: `ic-apigateway-staging-task-definition.json`
 
 ```json
@@ -169,18 +172,6 @@ Create file: `ic-apigateway-staging-task-definition.json`
         {
           "name": "DB_SCHEMA",
           "value": "staging_employees"
-        },
-        {
-          "name": "AUTH_SERVICE_URL",
-          "value": "http://auth-service.local:8001"
-        },
-        {
-          "name": "CORE_SERVICE_URL",
-          "value": "http://core-service.local:8002"
-        },
-        {
-          "name": "FILES_SERVICE_URL",
-          "value": "http://files-service.local:8003"
         }
       ],
       "logConfiguration": {
@@ -199,6 +190,8 @@ Create file: `ic-apigateway-staging-task-definition.json`
   "memory": "512"
 }
 ```
+
+**Note:** No Service Connect URLs in environment variables - API Gateway reads from database.
 
 Register the task definition:
 ```bash
