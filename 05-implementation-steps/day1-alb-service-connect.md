@@ -142,43 +142,110 @@ Create file: `ic-apigateway-staging-task-definition.json`
   "taskRoleArn": "arn:aws:iam::795189341938:role/ic-apigateway-staging-task-role",
   "containerDefinitions": [
     {
-      "name": "api-gateway",
-      "image": "795189341938.dkr.ecr.ap-southeast-1.amazonaws.com/api-gateway:latest",
+      "name": "ic-api-gateway-container",
+      "image": "795189341938.dkr.ecr.ap-southeast-1.amazonaws.com/ic-api-gateway-image:latest",
       "memory": 512,
       "cpu": 256,
       "essential": true,
       "portMappings": [
         {
-          "name": "api-port",
+          "name": "ic-api-gateway-port",
           "containerPort": 8000,
           "protocol": "tcp"
         }
       ],
       "secrets": [
         {
+          "name": "APP_NAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:APP_NAME::"
+        },
+        {
+          "name": "APP_ENV",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:APP_ENV::"
+        },
+        {
+          "name": "APP_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:APP_KEY::"
+        },
+        {
+          "name": "APP_DEBUG",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:APP_DEBUG::"
+        },
+        {
+          "name": "APP_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:APP_URL::"
+        },
+        {
+          "name": "APP_TIMEZONE",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:APP_TIMEZONE::"
+        },
+        {
+          "name": "LOG_CHANNEL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:LOG_CHANNEL::"
+        },
+        {
+          "name": "LOG_SLACK_WEBHOOK_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:LOG_SLACK_WEBHOOK_URL::"
+        },
+        {
+          "name": "DB_CONNECTION",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:DB_CONNECTION::"
+        },
+        {
           "name": "DB_HOST",
-          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:host::"
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:DB_HOST::"
+        },
+        {
+          "name": "DB_PORT",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:DB_PORT::"
+        },
+        {
+          "name": "DB_DATABASE",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:DB_DATABASE::"
         },
         {
           "name": "DB_USERNAME",
-          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:username::"
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:DB_USERNAME::"
         },
         {
           "name": "DB_PASSWORD",
-          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-microservices-rds-a7igAR:password::"
-        }
-      ],
-      "environment": [
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:DB_PASSWORD::"
+        },
         {
-          "name": "DB_SCHEMA",
-          "value": "staging_employees"
+          "name": "DB_TIMEZONE",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:DB_TIMEZONE::"
+        },
+        {
+          "name": "PROFILE_PICS_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:PROFILE_PICS_URL::"
+        },
+        {
+          "name": "CACHE_DRIVER",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:CACHE_DRIVER::"
+        },
+        {
+          "name": "QUEUE_CONNECTION",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:QUEUE_CONNECTION::"
+        },
+        {
+          "name": "ACCEPTED_SECRETS",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:ACCEPTED_SECRETS::"
+        },
+        {
+          "name": "FILES_MICROSERVICE_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:FILES_MICROSERVICE_URL::"
+        },
+        {
+          "name": "FILES_MICROSERVICE_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-api-gateway-staging-secrets-svwZog:FILES_MICROSERVICE_SECRET::"
         }
       ],
+      "environment": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
           "awslogs-create-group": "true",
-          "awslogs-group": "/ecs/ic-apigateway-staging",
+          "awslogs-group": "/ecs/ic-api-gateway-staging-logs",
           "awslogs-region": "ap-southeast-1",
           "awslogs-stream-prefix": "ecs"
         }
@@ -191,7 +258,10 @@ Create file: `ic-apigateway-staging-task-definition.json`
 }
 ```
 
-**Note:** No Service Connect URLs in environment variables - API Gateway reads from database.
+**Note:** 
+- No Service Connect URLs in environment variables - API Gateway reads from database
+- All your existing secrets are preserved
+- Uses your naming convention: `ic-api-gateway-port`
 
 Register the task definition:
 ```bash
@@ -213,7 +283,7 @@ aws ecs update-service \
     "namespace": "REPLACE_WITH_NAMESPACE_ID_FROM_STEP1",
     "services": [
       {
-        "portName": "api-port",
+        "portName": "ic-api-gateway-port",
         "discoveryName": "api-gateway",
         "clientAliases": [
           {
@@ -227,7 +297,7 @@ aws ecs update-service \
   --load-balancers '[
     {
       "targetGroupArn": "arn:aws:elasticloadbalancing:ap-southeast-1:795189341938:targetgroup/api-gateway-tg/REPLACE_WITH_TG_ID",
-      "containerName": "api-gateway",
+      "containerName": "ic-api-gateway-container",
       "containerPort": 8000
     }
   ]' \
