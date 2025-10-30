@@ -13,12 +13,12 @@
 - **Target Group ARN:** `arn:aws:elasticloadbalancing:ap-southeast-1:795189341938:targetgroup/ic-apigateway-staging-tg/92e300ce623f18bf`
 
 ### **ECS Configuration**
-- **Cluster Name:** `ic-general-services-cluster` (to be created)
+- **Cluster Name:** `ic-general-services-cluster` (created)
 - **Service Names:**
-  - API Gateway: `ic-apigateway-staging`
-  - AUTH: `ic-auth-staging` (to be created)
-  - CORE: `ic-core-staging` (to be created)
-  - FILES: `ic-files-staging` (to be created)
+  - API Gateway: `ic-api-gateway-service-staging` (✅ created)
+  - AUTH: `ic-auth-service-staging` (✅ created)
+  - CORE: `ic-core-service-staging` (to be created)
+  - FILES: `ic-files-service-staging` (to be created)
 
 ### **Service Connect Configuration**
 - **Namespace Name:** `ic-api-services-namespace`
