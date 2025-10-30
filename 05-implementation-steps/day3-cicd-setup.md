@@ -123,6 +123,8 @@ echo "Pipeline bucket: $PIPELINE_BUCKET"
 
 ## Step 4: Create CodeBuild Projects (15 minutes)
 
+**⚠️ IMPORTANT:** Create CodeBuild projects FIRST because CodePipeline needs to reference existing projects.
+
 ### **API Gateway CodeBuild Project:**
 ```bash
 # Create API Gateway build project
@@ -283,6 +285,8 @@ aws codebuild create-project \
 ```
 
 ## Step 5: Create CodePipeline (20 minutes)
+
+## Step 6: Add buildspec.yml to Each Repository (15 minutes)
 
 ### **API Gateway Pipeline:**
 ```bash

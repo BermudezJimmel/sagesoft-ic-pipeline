@@ -72,38 +72,48 @@ GitLab → CodeBuild (gets code + builds) → ECS (deploys)
 
 ---
 
-## 🛠️ **What Actually Happens in Day 3**
+## 🛠️ **What Actually Happens in Day 3 (Correct Order)**
 
-### **Step 1: CodeBuild Project Creation**
+### **Why CodeBuild First, Then CodePipeline?**
+
+**AWS Requirement:** CodePipeline needs to **reference existing CodeBuild projects**
+
+```
+Step 1: Create IAM Roles
+Step 2: Create S3 Bucket  
+Step 3: Create CodeBuild Projects ← **Must exist first**
+Step 4: Create CodePipeline ← **References CodeBuild projects**
+Step 5: Add buildspec.yml to repos
+Step 6: Test pipeline
+```
+
+### **Step 3: CodeBuild Project Creation**
 ```bash
 aws codebuild create-project \
+  --name ic-apigateway-staging-build \
   --source '{
-    "type": "GITLAB",
-    "location": "YOUR_GITLAB_REPO_URL"  ← **Integration #2**
+    "type": "CODEPIPELINE"  ← **Gets source FROM CodePipeline**
   }'
 ```
-**Purpose:** Tell CodeBuild "this is the repo you'll be building"
+**Purpose:** Create the build project that CodePipeline will use
 
-### **Step 2: CodePipeline Creation**
+### **Step 4: CodePipeline Creation**
 ```bash
 aws codepipeline create-pipeline \
   --pipeline '{
     "stages": [
       {
-        "name": "Source",
+        "name": "Build",
         "actions": [{
-          "actionTypeId": {
-            "provider": "GitLab"  ← **Integration #1**
-          },
           "configuration": {
-            "Repository": "YOUR_REPO"
+            "ProjectName": "ic-apigateway-staging-build"  ← **References existing project**
           }
         }]
       }
     ]
   }'
 ```
-**Purpose:** Tell CodePipeline "get code from this GitLab repo"
+**Purpose:** Create pipeline that uses the existing CodeBuild project
 
 ---
 
