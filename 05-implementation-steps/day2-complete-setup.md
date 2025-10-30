@@ -592,4 +592,131 @@ WHERE service_name = 'files';
 EMP (Amplify) → ALB (HTTPS) → API Gateway (8000) → Service Connect → {AUTH (8001), CORE (8002), FILES (8003)} → Multi-AZ RDS
 ```
 
+---
+
+## 🔧 Troubleshooting Service Connect DNS Resolution
+
+### **Issue: "Could not resolve host: core-service.local"**
+
+**Symptoms:**
+- Services can communicate using private IPs but not Service Connect DNS names
+- Error: `cURL error 6: Could not resolve host: core-service.local`
+- Private IP works: `http://10.0.x.x:8002` ✅
+- Service Connect DNS fails: `http://core-service.local:8002` ❌
+
+### **Root Cause Analysis Steps:**
+
+#### **Step 1: Verify Service Discovery Registration**
+```bash
+# Check if services are registered in Service Discovery
+aws servicediscovery list-services \
+  --filters Name=NAMESPACE_ID,Values=ns-xbe5ptxbnzf3cu2z \
+  --query 'Services[].{Name:Name,Type:Type}' \
+  --region ap-southeast-1
+```
+**Expected Output:** Should show `api-gateway`, `auth-service`, `core-service`
+
+#### **Step 2: Check ECS Cluster Service Connect Configuration**
+```bash
+# Verify cluster has Service Connect enabled
+aws ecs describe-clusters \
+  --clusters ic-general-services-cluster \
+  --include CONFIGURATIONS \
+  --region ap-southeast-1
+```
+**Look for:** `serviceConnectDefaults` configuration
+
+#### **Step 3: Verify Service Connect Configuration on Services**
+```bash
+# Check API Gateway service configuration
+aws ecs describe-services \
+  --cluster ic-general-services-cluster \
+  --services ic-apigateway-staging-service \
+  --region ap-southeast-1 \
+  --query 'services[0].serviceConnectConfiguration'
+
+# Check CORE service configuration  
+aws ecs describe-services \
+  --cluster ic-general-services-cluster \
+  --services ic-core-staging-service \
+  --region ap-southeast-1 \
+  --query 'services[0].serviceConnectConfiguration'
+```
+
+### **Solution Steps:**
+
+#### **Fix 1: Update Cluster Configuration (if needed)**
+```bash
+# Enable Service Connect on cluster level
+aws ecs put-cluster-capacity-providers \
+  --cluster ic-general-services-cluster \
+  --capacity-providers FARGATE \
+  --default-capacity-provider-strategy capacityProvider=FARGATE,weight=1 \
+  --region ap-southeast-1
+```
+
+#### **Fix 2: Recreate Services with Proper Service Connect**
+If Service Connect configuration shows `null`, recreate the services:
+
+```bash
+# Delete and recreate API Gateway service
+aws ecs delete-service \
+  --cluster ic-general-services-cluster \
+  --service ic-apigateway-staging-service \
+  --force \
+  --region ap-southeast-1
+
+# Wait for deletion, then recreate with proper Service Connect configuration
+# (Use the service creation commands from Step 2 above)
+```
+
+#### **Fix 3: Verify Task Definition Network Mode**
+Ensure task definitions use `awsvpc` network mode:
+```json
+{
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"]
+}
+```
+
+#### **Fix 4: Check Security Group Rules**
+```bash
+# Verify security groups allow internal communication
+aws ec2 describe-security-groups \
+  --group-ids sg-your-security-group-id \
+  --region ap-southeast-1
+```
+**Required:** Allow inbound traffic on ports 8001, 8002, 8003 from same security group
+
+### **Verification Commands:**
+
+#### **Test Service Connect Resolution:**
+```bash
+# From within API Gateway container, test DNS resolution
+nslookup core-service.local
+nslookup auth-service.local
+
+# Test HTTP connectivity
+curl -v http://core-service.local:8002/health
+curl -v http://auth-service.local:8001/health
+```
+
+#### **Check CloudWatch Logs:**
+```bash
+# Check API Gateway logs for connection errors
+aws logs filter-log-events \
+  --log-group-name /ecs/ic-apigateway-staging-logs \
+  --start-time $(date -d '1 hour ago' +%s)000 \
+  --region ap-southeast-1
+```
+
+### **Expected Resolution Timeline:**
+- Service Discovery registration: 1-2 minutes
+- DNS propagation: 2-3 minutes  
+- Service Connect activation: 3-5 minutes
+
+**✅ Success Indicator:** API Gateway can successfully call `http://core-service.local:8002/people` without DNS resolution errors.
+
+---
+
 **Next:** Set up CI/CD pipelines for automated deployments
