@@ -38,6 +38,12 @@ aws iam attach-role-policy \
   --role-name ic-apigateway-staging-execution-role \
   --policy-arn arn:aws:iam::aws:policy/SecretsManagerReadWrite \
   --region ap-southeast-1
+
+# CRITICAL: Add CloudWatch Logs permissions
+aws iam attach-role-policy \
+  --role-name ic-apigateway-staging-execution-role \
+  --policy-arn arn:aws:iam::aws:policy/CloudWatchLogsFullAccess \
+  --region ap-southeast-1
 ```
 
 ### **1.3 Create Task Role**

@@ -1,5 +1,50 @@
 # Day 2: Complete Service Connect + CI/CD Setup
 
+## Prerequisites: CloudWatch Logs Setup (5 minutes) - **REQUIRED FIRST**
+
+**⚠️ CRITICAL:** Create log groups and add CloudWatch permissions before creating services to avoid task failures.
+
+### **Create Log Groups for All Services:**
+```bash
+# Create log groups for all microservices
+aws logs create-log-group \
+  --log-group-name /ecs/ic-auth-staging-logs \
+  --region ap-southeast-1
+
+aws logs create-log-group \
+  --log-group-name /ecs/ic-core-staging-logs \
+  --region ap-southeast-1
+
+aws logs create-log-group \
+  --log-group-name /ecs/ic-files-staging-logs \
+  --region ap-southeast-1
+```
+
+### **Add CloudWatch Permissions to All Execution Roles:**
+```bash
+# Add CloudWatch permissions to AUTH execution role
+aws iam attach-role-policy \
+  --role-name ic-auth-staging-execution-role \
+  --policy-arn arn:aws:iam::aws:policy/CloudWatchLogsFullAccess \
+  --region ap-southeast-1
+
+# Add CloudWatch permissions to CORE execution role
+aws iam attach-role-policy \
+  --role-name ic-core-staging-execution-role \
+  --policy-arn arn:aws:iam::aws:policy/CloudWatchLogsFullAccess \
+  --region ap-southeast-1
+
+# Add CloudWatch permissions to FILES execution role
+aws iam attach-role-policy \
+  --role-name ic-files-staging-execution-role \
+  --policy-arn arn:aws:iam::aws:policy/CloudWatchLogsFullAccess \
+  --region ap-southeast-1
+```
+
+**✅ Complete these prerequisites before proceeding with service creation!**
+
+---
+
 ## Step 1: Create AUTH Service Task Definition and Service (25 minutes)
 
 ### **1.1 Create AUTH Task Definition File**
@@ -220,7 +265,7 @@ Create file: `ic-core-staging-task-definition.json`
   "containerDefinitions": [
     {
       "name": "ic-core-container",
-      "image": "795189341938.dkr.ecr.ap-southeast-1.amazonaws.com/ic-core-image:latest",
+      "image": "795189341938.dkr.ecr.ap-southeast-1.amazonaws.com/ic-core-v3-image:latest",
       "memory": 512,
       "cpu": 256,
       "essential": true,
@@ -234,7 +279,79 @@ Create file: `ic-core-staging-task-definition.json`
       "secrets": [
         {
           "name": "APP_NAME",
-          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-staging-secrets-XXXXXX:APP_NAME::"
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:APP_NAME::"
+        },
+        {
+          "name": "APP_ENV",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:APP_ENV::"
+        },
+        {
+          "name": "APP_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:APP_KEY::"
+        },
+        {
+          "name": "APP_DEBUG",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:APP_DEBUG::"
+        },
+        {
+          "name": "APP_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:APP_URL::"
+        },
+        {
+          "name": "APP_TIMEZONE",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:APP_TIMEZONE::"
+        },
+        {
+          "name": "LOG_CHANNEL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:LOG_CHANNEL::"
+        },
+        {
+          "name": "LOG_SLACK_WEBHOOK_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:LOG_SLACK_WEBHOOK_URL::"
+        },
+        {
+          "name": "DB_CONNECTION",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:DB_CONNECTION::"
+        },
+        {
+          "name": "DB_HOST",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:DB_HOST::"
+        },
+        {
+          "name": "DB_PORT",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:DB_PORT::"
+        },
+        {
+          "name": "DB_DATABASE",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:DB_DATABASE::"
+        },
+        {
+          "name": "DB_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:DB_USERNAME::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:DB_PASSWORD::"
+        },
+        {
+          "name": "DB_TIMEZONE",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:DB_TIMEZONE::"
+        },
+        {
+          "name": "PROFILE_PICS_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:PROFILE_PICS_URL::"
+        },
+        {
+          "name": "ACCEPTED_SECRETS",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:ACCEPTED_SECRETS::"
+        },
+        {
+          "name": "FILES_MICROSERVICE_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:FILES_MICROSERVICE_URL::"
+        },
+        {
+          "name": "FILES_MICROSERVICE_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-1:795189341938:secret:ic-core-v3-staging-secrets-O9MoQK:FILES_MICROSERVICE_SECRET::"
         }
       ],
       "environment": [],
@@ -254,8 +371,6 @@ Create file: `ic-core-staging-task-definition.json`
   "memory": "512"
 }
 ```
-
-**Note:** Replace `ic-core-staging-secrets-XXXXXX` with your actual CORE secrets ARN.
 
 ### **2.2 Register CORE Task Definition**
 ```bash
