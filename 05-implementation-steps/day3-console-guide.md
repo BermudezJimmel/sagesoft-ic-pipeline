@@ -1,5 +1,7 @@
 # Day 3: CI/CD Pipeline Setup (AWS Console Guide)
 
+**📊 Confused about GitLab integration?** → [See Day 3 Flow Diagram](./day3-flow-diagram.md)
+
 ## Prerequisites (Day 1 & 2 Complete)
 - ✅ ECS services running with Service Connect
 - ✅ ALB configured and healthy
