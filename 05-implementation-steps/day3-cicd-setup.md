@@ -27,12 +27,7 @@ aws iam create-role \
   }' \
   --region ap-southeast-1
 
-# Attach required policies
-aws iam attach-role-policy \
-  --role-name ic-codepipeline-staging-role \
-  --policy-arn arn:aws:iam::aws:policy/AWSCodePipelineFullAccess \
-  --region ap-southeast-1
-
+# Attach required policies (using basic policies that exist)
 aws iam attach-role-policy \
   --role-name ic-codepipeline-staging-role \
   --policy-arn arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess \
@@ -46,6 +41,26 @@ aws iam attach-role-policy \
 aws iam attach-role-policy \
   --role-name ic-codepipeline-staging-role \
   --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess \
+  --region ap-southeast-1
+
+# Add CodePipeline permissions via inline policy
+aws iam put-role-policy \
+  --role-name ic-codepipeline-staging-role \
+  --policy-name CodePipelineInlinePolicy \
+  --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "codepipeline:*",
+          "codebuild:BatchGetBuilds",
+          "codebuild:StartBuild"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }' \
   --region ap-southeast-1
 ```
 
