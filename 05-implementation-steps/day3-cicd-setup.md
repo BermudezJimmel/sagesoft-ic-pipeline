@@ -157,6 +157,10 @@ aws codebuild create-project \
         "value": "latest"
       },
       {
+        "name": "CONTAINER_NAME",
+        "value": "ic-api-gateway-container"
+      },
+      {
         "name": "ECS_CLUSTER_NAME",
         "value": "ic-general-services-cluster"
       },
@@ -206,6 +210,10 @@ aws codebuild create-project \
         "value": "latest"
       },
       {
+        "name": "CONTAINER_NAME",
+        "value": "ic-auth-container"
+      },
+      {
         "name": "ECS_CLUSTER_NAME",
         "value": "ic-general-services-cluster"
       },
@@ -253,6 +261,10 @@ aws codebuild create-project \
       {
         "name": "IMAGE_TAG",
         "value": "latest"
+      },
+      {
+        "name": "CONTAINER_NAME",
+        "value": "ic-core-container"
       },
       {
         "name": "ECS_CLUSTER_NAME",
@@ -369,24 +381,13 @@ phases:
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - docker push $REPOSITORY_URI:latest
-      - echo Updating ECS service...
-      - |
-        aws ecs update-service \
-          --cluster $ECS_CLUSTER_NAME \
-          --service $ECS_SERVICE_NAME \
-          --force-new-deployment \
-          --region $AWS_DEFAULT_REGION
-      - echo Waiting for deployment to complete...
-      - |
-        aws ecs wait services-stable \
-          --cluster $ECS_CLUSTER_NAME \
-          --services $ECS_SERVICE_NAME \
-          --region $AWS_DEFAULT_REGION
-      - echo Deployment completed successfully
+      - echo Creating imagedefinitions.json for CodePipeline...
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
 
 artifacts:
   files:
-    - '**/*'
+    - imagedefinitions.json
   name: BuildArtifact
 
 cache:
@@ -395,10 +396,10 @@ cache:
 ```
 
 **Key Features:**
+- ✅ **imagedefinitions.json:** CodePipeline handles ECS deployment automatically
 - ✅ **Composer Cache:** Speeds up builds by caching PHP dependencies
 - ✅ **Commit Hash Tagging:** Uses Git commit hash for image versioning
-- ✅ **Zero Downtime:** ECS rolling deployment with wait for stability
-- ✅ **Service Connect Preserved:** Maintains Service Connect during deployments
+- ✅ **Proper Separation:** Build phase creates artifacts, CodePipeline deploys
 
 ## Step 7: Test CI/CD Pipeline (15 minutes)
 
