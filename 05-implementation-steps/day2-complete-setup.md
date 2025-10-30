@@ -832,4 +832,4 @@ aws logs filter-log-events \
 
 ---
 
-**Next:** Set up CI/CD pipelines for automated deployments
+**Next:** [Day 3: CI/CD Pipeline Setup](./day3-cicd-setup.md) for automated deployments
