@@ -150,7 +150,7 @@ aws codebuild create-project \
       },
       {
         "name": "IMAGE_REPO_NAME",
-        "value": "ic-apigateway-staging"
+        "value": "ic-api-gateway-image"
       },
       {
         "name": "IMAGE_TAG",
@@ -199,7 +199,7 @@ aws codebuild create-project \
       },
       {
         "name": "IMAGE_REPO_NAME",
-        "value": "ic-auth-staging"
+        "value": "ic-auth-image"
       },
       {
         "name": "IMAGE_TAG",
@@ -248,7 +248,7 @@ aws codebuild create-project \
       },
       {
         "name": "IMAGE_REPO_NAME",
-        "value": "ic-core-staging"
+        "value": "ic-core-image"
       },
       {
         "name": "IMAGE_TAG",
