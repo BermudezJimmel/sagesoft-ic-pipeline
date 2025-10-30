@@ -2,7 +2,7 @@
 
 ## 📊 Project Overview
 **Goal:** Implement CI/CD for 4 microservices with Load Balancer and Service Connect  
-**Timeline:** 2 Days  
+**Timeline:** 3 Days  
 **Services:** API Gateway (8000), AUTH (8001), CORE (8002), FILES (8003)  
 **Architecture:** GitLab → CodePipeline → ECR → ECS Fargate → ALB → Service Connect
 
@@ -20,11 +20,11 @@
 | [🗄️ Database Updates](./09-database-updates/service-connect-database-migration.md) | **CRITICAL** - Update URLs in database | ⚠️ **REQUIRED** |
 
 ### 🛠️ **Implementation Phase**
-| Method | Day 1 | Day 2 | Best For |
-|--------|-------|-------|----------|
-| **🖱️ Console** | [📄 ALB + Service Connect](./05-implementation-steps/day1-console-guide.md) | [📄 Complete Setup](./05-implementation-steps/day2-console-guide.md) | Beginners, Visual learners |
-| **⌨️ CLI** | [📄 ALB + Service Connect](./05-implementation-steps/day1-alb-service-connect.md) | [📄 Complete Setup](./05-implementation-steps/day2-complete-setup.md) | Fast execution, Professionals |
-| **🎯 Choose** | [📄 Method Selection Guide](./05-implementation-steps/🎯%20CHOOSE-YOUR-METHOD.md) | Compare both approaches | Unsure which to use |
+| Method | Day 1 | Day 2 | Day 3 | Best For |
+|--------|-------|-------|-------|----------|
+| **🖱️ Console** | [📄 ALB + Service Connect](./05-implementation-steps/day1-console-guide.md) | [📄 Complete Setup](./05-implementation-steps/day2-console-guide.md) | [📄 CI/CD Setup](./05-implementation-steps/day3-cicd-setup.md) | Beginners, Visual learners |
+| **⌨️ CLI** | [📄 ALB + Service Connect](./05-implementation-steps/day1-alb-service-connect.md) | [📄 Complete Setup](./05-implementation-steps/day2-complete-setup.md) | [📄 CI/CD Setup](./05-implementation-steps/day3-cicd-setup.md) | Fast execution, Professionals |
+| **🎯 Choose** | [📄 Method Selection Guide](./05-implementation-steps/🎯%20CHOOSE-YOUR-METHOD.md) | Compare both approaches | | Unsure which to use |
 
 ### 📚 **Reference Materials**
 | Document | Use Case |
@@ -55,9 +55,10 @@ New: ALB → API Gateway → Service Connect → Microservices ✅
 - Secure internal communication
 
 ### **4. Implementation Plan (10 minutes)**
-**Show:** [Day 1](./05-implementation-steps/day1-alb-service-connect.md) + [Day 2](./05-implementation-steps/day2-complete-setup.md)
-- Day 1: Load balancer + Service Connect
-- Day 2: CI/CD pipelines + testing
+**Show:** [Day 1](./05-implementation-steps/day1-alb-service-connect.md) + [Day 2](./05-implementation-steps/day2-complete-setup.md) + [Day 3](./05-implementation-steps/day3-cicd-setup.md)
+- Day 1: Load balancer + Service Connect foundation
+- Day 2: Complete service setup + troubleshooting
+- Day 3: CI/CD pipelines + automated deployments
 
 ### **5. Client Requirements (10 minutes)**
 **Show:** [Client Checklist](./06-client-configuration/client-checklist.md)
@@ -113,15 +114,22 @@ aws codepipeline create-pipeline --cli-input-json file://api-gateway-pipeline.js
 
 ### **Day 2 Success Criteria**
 - [ ] All 4 services using Service Connect
-- [ ] Services communicate via .local DNS
+- [ ] Services communicate via .local DNS (✅ **COMPLETED**)
+- [ ] Service Connect DNS resolution working (✅ **FIXED**)
+- [ ] ALB target group health checks passing
+
+### **Day 3 Success Criteria**
+- [ ] CodePipeline and CodeBuild IAM roles created
+- [ ] CodeBuild projects for all services created
 - [ ] CodePipeline created for all services
-- [ ] End-to-end deployment test successful
+- [ ] buildspec.yml added to GitLab repositories
+- [ ] End-to-end CI/CD deployment test successful
 
 ### **Final Success Criteria**
 - [ ] Zero downtime deployments working
-- [ ] Manual approval gates functional
-- [ ] Rollback capability tested
-- [ ] Client can trigger deployments from GitLab
+- [ ] Automated GitLab → ECS deployments functional
+- [ ] Service Connect maintained during deployments
+- [ ] Client can trigger deployments from GitLab commits
 
 ---
 
@@ -147,7 +155,8 @@ aws codepipeline create-pipeline --cli-input-json file://api-gateway-pipeline.js
 |-------|------------------|------------------|
 | **Planning** | [Architecture Decisions](./00-architecture-decisions/final-architecture.md) | [Client Checklist](./06-client-configuration/client-checklist.md) |
 | **Day 1** | [Day 1 Guide](./05-implementation-steps/day1-alb-service-connect.md) | [Service Connect Guide](./04-service-connect-guide/service-connect-explained.md) |
-| **Day 2** | [Day 2 Guide](./05-implementation-steps/day2-complete-setup.md) | [CodePipeline Template](./03-gitlab-pipelines/codepipeline-template.json) |
+| **Day 2** | [Day 2 Guide](./05-implementation-steps/day2-complete-setup.md) | [Troubleshooting Section](./05-implementation-steps/day2-complete-setup.md#troubleshooting-service-connect-dns-resolution) |
+| **Day 3** | [Day 3 Guide](./05-implementation-steps/day3-cicd-setup.md) | [CodePipeline Template](./03-gitlab-pipelines/codepipeline-template.json) |
 | **Testing** | [Implementation Checklist](./implementation-checklist.md) | All guides |
 
 ---
