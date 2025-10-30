@@ -22,7 +22,7 @@
 ### 🛠️ **Implementation Phase**
 | Method | Day 1 | Day 2 | Day 3 | Best For |
 |--------|-------|-------|-------|----------|
-| **🖱️ Console** | [📄 ALB + Service Connect](./05-implementation-steps/day1-console-guide.md) | [📄 Complete Setup](./05-implementation-steps/day2-console-guide.md) | [📄 CI/CD Setup](./05-implementation-steps/day3-cicd-setup.md) | Beginners, Visual learners |
+| **🖱️ Console** | [📄 ALB + Service Connect](./05-implementation-steps/day1-console-guide.md) | [📄 Complete Setup](./05-implementation-steps/day2-console-guide.md) | [📄 CI/CD Setup](./05-implementation-steps/day3-console-guide.md) | Beginners, Visual learners |
 | **⌨️ CLI** | [📄 ALB + Service Connect](./05-implementation-steps/day1-alb-service-connect.md) | [📄 Complete Setup](./05-implementation-steps/day2-complete-setup.md) | [📄 CI/CD Setup](./05-implementation-steps/day3-cicd-setup.md) | Fast execution, Professionals |
 | **🎯 Choose** | [📄 Method Selection Guide](./05-implementation-steps/🎯%20CHOOSE-YOUR-METHOD.md) | Compare both approaches | | Unsure which to use |
 
