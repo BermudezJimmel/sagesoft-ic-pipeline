@@ -655,19 +655,104 @@ aws ecs put-cluster-capacity-providers \
   --region ap-southeast-1
 ```
 
-#### **Fix 2: Recreate Services with Proper Service Connect**
-If Service Connect configuration shows `null`, recreate the services:
+#### **Fix 2: Recreate API Gateway Service with Service Connect + ALB**
+If API Gateway Service Connect configuration shows `null`, recreate it:
 
+**Step 1: Find correct service name:**
 ```bash
-# Delete and recreate API Gateway service
+# List services to get exact name
+aws ecs list-services \
+  --cluster ic-general-services-cluster \
+  --region ap-southeast-1
+```
+
+**Step 2: Delete API Gateway service:**
+```bash
+# Use correct service name: ic-api-gateway-service-staging
 aws ecs delete-service \
   --cluster ic-general-services-cluster \
-  --service ic-apigateway-staging-service \
+  --service ic-api-gateway-service-staging \
   --force \
   --region ap-southeast-1
+```
 
-# Wait for deletion, then recreate with proper Service Connect configuration
-# (Use the service creation commands from Step 2 above)
+**Step 3: Monitor deletion status (REQUIRED - wait for complete deletion):**
+```bash
+# Check deletion status - repeat until service is not found
+aws ecs describe-services \
+  --cluster ic-general-services-cluster \
+  --services ic-api-gateway-service-staging \
+  --region ap-southeast-1 \
+  --query 'services[0].status'
+
+# Expected progression: "DRAINING" → "INACTIVE" → Service not found
+```
+
+**Step 4: Verify complete deletion:**
+```bash
+# Should return empty array [] when fully deleted
+aws ecs list-services \
+  --cluster ic-general-services-cluster \
+  --region ap-southeast-1 \
+  --query 'serviceArns[?contains(@, `ic-api-gateway-service-staging`)]'
+```
+
+**Step 5: Recreate with Service Connect (client-only):**
+```bash
+# Recreate API Gateway service with Service Connect client configuration
+aws ecs create-service \
+  --cluster ic-general-services-cluster \
+  --service-name ic-api-gateway-service-staging \
+  --task-definition ic-apigateway-staging-task:1 \
+  --desired-count 1 \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[subnet-0e9a0ec15dc80197d,subnet-096a5e3c10eef5f5c],securityGroups=[sg-0bcd67a1053a4e84a],assignPublicIp=DISABLED}" \
+  --service-connect-configuration '{
+    "enabled": true,
+    "namespace": "arn:aws:servicediscovery:ap-southeast-1:795189341938:namespace/ns-xbe5ptxbnzf3cu2z"
+  }' \
+  --region ap-southeast-1
+```
+
+**Step 6: Add ALB Target Group (CRITICAL - API Gateway needs ALB access):**
+```bash
+# Update service to include ALB target group
+aws ecs update-service \
+  --cluster ic-general-services-cluster \
+  --service ic-api-gateway-service-staging \
+  --load-balancers '[
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:ap-southeast-1:795189341938:targetgroup/ic-apigateway-staging-tg/92e300ce623f18bf",
+      "containerName": "ic-api-gateway-container",
+      "containerPort": 8000
+    }
+  ]' \
+  --region ap-southeast-1
+```
+
+**Step 7: Wait for deployment completion:**
+```bash
+# Monitor until rolloutState shows "COMPLETED"
+aws ecs describe-services \
+  --cluster ic-general-services-cluster \
+  --services ic-api-gateway-service-staging \
+  --region ap-southeast-1 \
+  --query 'services[0].deployments[0].rolloutState'
+```
+
+**Step 8: Verify both configurations:**
+```bash
+# Verify Service Connect (should not be null)
+aws ecs describe-services \
+  --cluster ic-general-services-cluster \
+  --services ic-api-gateway-service-staging \
+  --region ap-southeast-1 \
+  --query 'services[0].deployments[0].serviceConnectConfiguration'
+
+# Verify ALB target group health
+aws elbv2 describe-target-health \
+  --target-group-arn arn:aws:elasticloadbalancing:ap-southeast-1:795189341938:targetgroup/ic-apigateway-staging-tg/92e300ce623f18bf \
+  --region ap-southeast-1
 ```
 
 #### **Fix 3: Verify Task Definition Network Mode**
@@ -692,30 +777,58 @@ aws ec2 describe-security-groups \
 
 #### **Test Service Connect Resolution:**
 ```bash
-# From within API Gateway container, test DNS resolution
-nslookup core-service.local
-nslookup auth-service.local
+# Verify Service Discovery registration
+aws servicediscovery list-services \
+  --filters Name=NAMESPACE_ID,Values=ns-xbe5ptxbnzf3cu2z \
+  --query 'Services[].{Name:Name,Type:Type}' \
+  --region ap-southeast-1
 
-# Test HTTP connectivity
-curl -v http://core-service.local:8002/health
-curl -v http://auth-service.local:8001/health
+# Expected: api-gateway, auth-service, core-service
 ```
 
-#### **Check CloudWatch Logs:**
+#### **Test ALB and Target Group Health:**
 ```bash
-# Check API Gateway logs for connection errors
-aws logs filter-log-events \
-  --log-group-name /ecs/ic-apigateway-staging-logs \
-  --start-time $(date -d '1 hour ago' +%s)000 \
+# Check target group health (should show healthy targets)
+aws elbv2 describe-target-health \
+  --target-group-arn arn:aws:elasticloadbalancing:ap-southeast-1:795189341938:targetgroup/ic-apigateway-staging-tg/92e300ce623f18bf \
+  --region ap-southeast-1
+
+# Get ALB DNS name for external testing
+aws elbv2 describe-load-balancers \
+  --names ic-apigateway-staging-lb \
+  --query 'LoadBalancers[0].DNSName' \
+  --output text \
   --region ap-southeast-1
 ```
 
-### **Expected Resolution Timeline:**
-- Service Discovery registration: 1-2 minutes
-- DNS propagation: 2-3 minutes  
-- Service Connect activation: 3-5 minutes
+#### **Test Service Connect Communication:**
+From within API Gateway container (or test endpoint), verify DNS resolution works:
+- ✅ `http://core-service.local:8002` - should resolve and connect
+- ✅ `http://auth-service.local:8001` - should resolve and connect
 
-**✅ Success Indicator:** API Gateway can successfully call `http://core-service.local:8002/people` without DNS resolution errors.
+#### **Check CloudWatch Logs:**
+```bash
+# Check API Gateway logs for successful connections (no more DNS errors)
+aws logs filter-log-events \
+  --log-group-name /ecs/ic-apigateway-staging-logs \
+  --start-time $(date -d '10 minutes ago' +%s)000 \
+  --region ap-southeast-1 \
+  --filter-pattern "core-service.local"
+```
+
+### **Expected Resolution Timeline:**
+- Service deletion: 3-5 minutes
+- Service recreation: 2-3 minutes  
+- ALB target registration: 1-2 minutes
+- Service Connect DNS propagation: 1-2 minutes
+- **Total:** 7-12 minutes
+
+**✅ Success Indicators:**
+1. API Gateway service has both Service Connect AND load balancer configured
+2. Target group shows healthy targets
+3. API Gateway can successfully call `http://core-service.local:8002` without DNS errors
+4. External access via ALB DNS name works
+5. No "Could not resolve host" errors in logs
 
 ---
 
