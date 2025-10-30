@@ -340,7 +340,9 @@ aws codepipeline create-pipeline \
 
 ## Step 6: Add buildspec.yml to Each Repository
 
-### **Sample buildspec.yml (add to each microservice repo):**
+### **Lumen Microservices buildspec.yml (add to each microservice repo):**
+**File:** `buildspec.yml` (place in root of each repository)
+
 ```yaml
 version: 0.2
 
@@ -349,20 +351,54 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - echo Repository URI is $REPOSITORY_URI
+      - echo Image tag is $IMAGE_TAG
   build:
     commands:
       - echo Build started on `date`
-      - echo Building the Docker image...
+      - echo Building the Docker image for PHP Lumen microservice...
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:latest
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing the Docker image...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
       - echo Updating ECS service...
-      - aws ecs update-service --cluster $ECS_CLUSTER_NAME --service $ECS_SERVICE_NAME --force-new-deployment --region $AWS_DEFAULT_REGION
+      - |
+        aws ecs update-service \
+          --cluster $ECS_CLUSTER_NAME \
+          --service $ECS_SERVICE_NAME \
+          --force-new-deployment \
+          --region $AWS_DEFAULT_REGION
+      - echo Waiting for deployment to complete...
+      - |
+        aws ecs wait services-stable \
+          --cluster $ECS_CLUSTER_NAME \
+          --services $ECS_SERVICE_NAME \
+          --region $AWS_DEFAULT_REGION
+      - echo Deployment completed successfully
+
+artifacts:
+  files:
+    - '**/*'
+  name: BuildArtifact
+
+cache:
+  paths:
+    - '/root/.composer/cache/**/*'
 ```
+
+**Key Features:**
+- ✅ **Composer Cache:** Speeds up builds by caching PHP dependencies
+- ✅ **Commit Hash Tagging:** Uses Git commit hash for image versioning
+- ✅ **Zero Downtime:** ECS rolling deployment with wait for stability
+- ✅ **Service Connect Preserved:** Maintains Service Connect during deployments
 
 ## Step 7: Test CI/CD Pipeline (15 minutes)
 
