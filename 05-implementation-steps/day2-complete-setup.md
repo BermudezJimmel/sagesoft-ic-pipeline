@@ -77,7 +77,7 @@ aws ecs update-service \
   --task-definition ic-auth-staging-task \
   --service-connect-configuration '{
     "enabled": true,
-    "namespace": "REPLACE_WITH_NAMESPACE_ID",
+    "namespace": "arn:aws:servicediscovery:ap-southeast-1:795189341938:namespace/ns-xbe5ptxbnzf3cu2z",
     "services": [
       {
         "portName": "auth-port",
@@ -221,12 +221,12 @@ aws ecs register-task-definition \
 
 # Update CORE service
 aws ecs update-service \
-  --cluster REPLACE_WITH_YOUR_CLUSTER_NAME \
+  --cluster ic-general-services-cluster \
   --service REPLACE_WITH_CORE_SERVICE_NAME \
   --task-definition ic-core-staging-task \
   --service-connect-configuration '{
     "enabled": true,
-    "namespace": "REPLACE_WITH_NAMESPACE_ID",
+    "namespace": "arn:aws:servicediscovery:ap-southeast-1:795189341938:namespace/ns-xbe5ptxbnzf3cu2z",
     "services": [
       {
         "portName": "core-port",
@@ -249,12 +249,12 @@ aws ecs register-task-definition \
 
 # Update FILES service
 aws ecs update-service \
-  --cluster REPLACE_WITH_YOUR_CLUSTER_NAME \
+  --cluster ic-general-services-cluster \
   --service REPLACE_WITH_FILES_SERVICE_NAME \
   --task-definition ic-files-staging-task \
   --service-connect-configuration '{
     "enabled": true,
-    "namespace": "REPLACE_WITH_NAMESPACE_ID",
+    "namespace": "arn:aws:servicediscovery:ap-southeast-1:795189341938:namespace/ns-xbe5ptxbnzf3cu2z",
     "services": [
       {
         "portName": "files-port",

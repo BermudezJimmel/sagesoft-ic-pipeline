@@ -99,12 +99,23 @@ aws ecs describe-clusters \
 ```bash
 # Create private DNS namespace for Service Connect
 aws servicediscovery create-private-dns-namespace \
-  --name ic-microservices \
-  --vpc vpc-REPLACE_WITH_YOUR_VPC_ID \
+  --name ic-api-services-namespace \
+  --vpc vpc-0a4ae3fd58a788210 \
   --region ap-southeast-1
 
-# Save the namespace ID from output - you'll need it later
-# Example output: "NamespaceId": "ns-abcd1234efgh5678"
+# Check operation status (replace with your operation ID)
+aws servicediscovery get-operation \
+  --operation-id YOUR_OPERATION_ID_FROM_ABOVE \
+  --region ap-southeast-1
+
+# Get namespace ID and ARN
+aws servicediscovery list-namespaces \
+  --query 'Namespaces[?Name==`ic-api-services-namespace`].[Id,Arn]' \
+  --output table \
+  --region ap-southeast-1
+
+# Save the namespace ARN - you'll need it for service creation
+# Example: arn:aws:servicediscovery:ap-southeast-1:795189341938:namespace/ns-xbe5ptxbnzf3cu2z
 ```
 
 ## Step 2: Create Application Load Balancer (15 minutes)
@@ -288,11 +299,13 @@ aws ecs register-task-definition \
 
 ## Step 5: Create API Gateway ECS Service with Service Connect (20 minutes)
 
+**⚠️ IMPORTANT:** Use the **full namespace ARN**, not just the ID.
+
 ```bash
 # Create API Gateway ECS service with Service Connect and ALB
 aws ecs create-service \
   --cluster ic-general-services-cluster \
-  --service-name ic-apigateway-staging \
+  --service-name ic-api-gateway-service-staging \
   --task-definition ic-apigateway-staging-task \
   --desired-count 1 \
   --capacity-provider-strategy capacityProvider=FARGATE,weight=1 \
@@ -305,7 +318,7 @@ aws ecs create-service \
   }' \
   --service-connect-configuration '{
     "enabled": true,
-    "namespace": "REPLACE_WITH_NAMESPACE_ID_FROM_STEP2",
+    "namespace": "arn:aws:servicediscovery:ap-southeast-1:795189341938:namespace/ns-xbe5ptxbnzf3cu2z",
     "services": [
       {
         "portName": "ic-api-gateway-port",
@@ -331,9 +344,11 @@ aws ecs create-service \
 # Verify service creation
 aws ecs describe-services \
   --cluster ic-general-services-cluster \
-  --services ic-apigateway-staging \
+  --services ic-api-gateway-service-staging \
   --region ap-southeast-1
 ```
+
+**Note:** Replace the namespace ARN with your actual namespace ARN from Step 2.
 
 ## Step 6: Test ALB Connection (10 minutes)
 

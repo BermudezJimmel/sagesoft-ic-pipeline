@@ -21,7 +21,10 @@
   - FILES: `ic-files-staging` (to be created)
 
 ### **Service Connect Configuration**
-- **Namespace:** `ic-microservices` (to be created)
+- **Namespace Name:** `ic-api-services-namespace`
+- **Namespace ID:** `ns-xbe5ptxbnzf3cu2z`
+- **Namespace ARN:** `arn:aws:servicediscovery:ap-southeast-1:795189341938:namespace/ns-xbe5ptxbnzf3cu2z`
+- **⚠️ Important:** Use full ARN in ECS service configuration
 - **Service DNS Names:**
   - API Gateway: `api-gateway.local:8000`
   - AUTH: `auth-service.local:8001`
