@@ -8,6 +8,10 @@ CICD-LoadBalancer-Implementation/
 ├── 🎯 IMPLEMENTATION-DASHBOARD.md          ← **START HERE** (Main navigation)
 ├── 📋 QUICK-REFERENCE-CARD.md             ← **CLIENT MEETING** (Talking points)
 ├── 📁 FOLDER-STRUCTURE-GUIDE.md           ← **THIS FILE** (Navigation help)
+├── 🚀 BLUE-GREEN-QUICK-REFERENCE.md       ← **WORKING GUIDE** (Proven Blue/Green setup)
+├── ⚠️ ALB-SCHEME-SELECTION-GUIDE.md       ← **CRITICAL** (Internet-facing vs Internal ALB)
+├── 🚨 CURRENT-ISSUES-GUIDE.md             ← **TROUBLESHOOTING** (Current implementation issues)
+├── ecs-bluegreen-guide.md                 ← **WORKING DEPLOYMENT** (Your proven setup)
 │
 ├── 00-architecture-decisions/              ← **PLANNING PHASE**
 │   ├── clarifications.md                   │  All client questions & answers

@@ -87,7 +87,48 @@ Use **both** for different purposes:
 
 ---
 
-## 🔥 **Issue 4: Internet-facing vs Internal ALB**
+## 🔥 **Issue 4: ALB Scheme Selection (COMMON MISTAKE)**
+
+### **Problem:**
+Selected **"Internet-facing"** instead of **"Internal"** when creating ALB for internal communication.
+
+### **⚠️ CRITICAL:** 
+When creating ALB for internal service communication, you MUST select:
+- **Scheme: Internal** (not Internet-facing)
+- **Subnets: Private subnets** (where your ECS services are)
+
+### **Console Steps:**
+1. EC2 → Load Balancers → Create Application Load Balancer
+2. **⚠️ IMPORTANT:** Select **"Internal"** under Scheme
+3. Select **private subnets** (same as ECS services)
+4. Configure security group for VPC CIDR only
+
+### **CLI Command:**
+```bash
+# CORRECT - Internal ALB
+aws elbv2 create-load-balancer \
+  --name ic-core-internal-alb \
+  --subnets subnet-096a5e3c10eef5f5c subnet-0e9a0ec15dc80197d \
+  --scheme internal \  # ← CRITICAL: Must be "internal"
+  --security-groups sg-YOUR_INTERNAL_SG_ID \
+  --region ap-southeast-1
+
+# WRONG - Internet-facing ALB (common mistake)
+# --scheme internet-facing  # ← This breaks internal communication
+```
+
+### **How to Verify:**
+```bash
+# Check ALB scheme
+aws elbv2 describe-load-balancers \
+  --names YOUR_ALB_NAME \
+  --query 'LoadBalancers[0].Scheme' \
+  --region ap-southeast-1
+
+# Should return: "internal" (not "internet-facing")
+```
+
+---
 
 ### **Current Status:**
 - CORE ALB: `ic-corev3-production-ecs-lb` (internet-facing)

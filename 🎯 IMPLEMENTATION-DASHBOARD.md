@@ -31,6 +31,7 @@
 |----------|----------|
 | [📄 CodePipeline Template](./03-gitlab-pipelines/codepipeline-template.json) | Copy-paste pipeline config |
 | [📄 BuildSpec Template](./03-gitlab-pipelines/buildspec.yml) | Add to GitLab repos |
+| [📄 **Blue/Green Deployment Guide**](./ecs-bluegreen-guide.md) | **WORKING GUIDE** - Proven Blue/Green setup |
 | [📄 Code Updates Guide](./07-application-code-updates/code-migration-guide.md) | **CRITICAL:** Client code changes |
 | [📄 Implementation Checklist](./implementation-checklist.md) | Track progress |
 
@@ -81,16 +82,16 @@ New: ALB → API Gateway → Service Connect → Microservices ✅
 - CORE Service: Running with Blue/Green deployment setup
 
 ### **⚠️ Current Issues (Day 3):**
-1. **Internal ALB Configuration:** CORE service needs internal ALB for secure communication
-2. **CodeDeploy Error:** "Primary taskset target group must be behind listener" 
-3. **Security Groups:** NAT Gateway IP vs VPC CIDR for ALB access
-4. **Architecture Decision:** Service Connect (discovery) + Internal ALB (load balancing)
+1. ✅ **RESOLVED:** Internal ALB Configuration (was selecting Internet-facing instead of Internal)
+2. ✅ **RESOLVED:** CodeDeploy Error "Primary taskset target group must be behind listener"
+3. ✅ **RESOLVED:** Security Groups (Internal ALB eliminates NAT Gateway IP issues)
+4. ✅ **CLARIFIED:** Architecture Decision - Service Connect (discovery) + Internal ALB (load balancing)
 
 ### **🎯 Next Steps:**
-1. Fix internal ALB listener configuration with blue/green target groups
-2. Update CodeDeploy deployment group to use internal ALB
-3. Test API Gateway → Internal CORE ALB communication
-4. Proceed with CI/CD pipeline setup
+1. ✅ Internal ALB listener configuration with blue/green target groups - COMPLETED
+2. ✅ Update CodeDeploy deployment group to use internal ALB - COMPLETED  
+3. ✅ Test API Gateway → Internal CORE ALB communication - WORKING
+4. 🚀 **READY:** Proceed with CI/CD pipeline setup
 
 ---
 
@@ -125,6 +126,7 @@ aws codepipeline create-pipeline --cli-input-json file://api-gateway-pipeline.js
 |-------|---------------|-----------|
 | **🔥 CURRENT:** Internal ALB CodeDeploy error | [Day 3 Guide](./05-implementation-steps/day3-cicd-setup.md) | Configure target groups in internal ALB listener |
 | **🔥 CURRENT:** API Gateway → CORE ALB 504 error | [Security Group Guide](./CLIENT-INFRASTRUCTURE-VALUES.md) | Use NAT Gateway IP in ALB security group |
+| **🔥 COMMON MISTAKE:** Selected Internet-facing instead of Internal ALB | [Current Issues Guide](./🚨%20CURRENT-ISSUES-GUIDE.md) | **CRITICAL:** Must select "Internal" scheme for internal communication |
 | **🔥 CURRENT:** Service Connect vs ALB confusion | [Service Connect Guide](./04-service-connect-guide/service-connect-explained.md) | Service Connect = Discovery, ALB = Load Balancing |
 | Service Connect not working | [Service Connect Guide](./04-service-connect-guide/service-connect-explained.md) | Check namespace ID |
 | ALB health check failing | [Day 1 Guide](./05-implementation-steps/day1-alb-service-connect.md) | Use TCP health check |
