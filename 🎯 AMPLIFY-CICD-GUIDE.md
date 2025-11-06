@@ -9,21 +9,36 @@
 
 ---
 
-## 🚀 **Step 1: Connect GitLab Repository (10 minutes)**
+## 🚀 **Step 1: Connect GitLab Repository**
 
-### **Via AWS Console:**
-1. **Navigate to Amplify Console**
-   - Go to AWS Amplify service
-   - Click "Get Started" under "Amplify Hosting"
+### **🖱️ Console Method (Recommended for Beginners):**
 
-2. **Connect Repository**
-   - Select "GitLab" as source
-   - Click "Continue"
-   - Authorize AWS Amplify to access your GitLab account
-   - Select your EMP UI repository
-   - Choose branch (usually `main` or `master`)
+#### **1.1 Access Amplify Console:**
+1. **Login to AWS Console** → Search "Amplify" → Click "AWS Amplify"
+2. **Click "Get Started"** under "Amplify Hosting"
+3. **Select "Deploy without Git provider"** if you want to upload manually, OR
+4. **Select "GitLab"** for automatic CI/CD
 
-### **Via AWS CLI:**
+#### **1.2 Connect GitLab Repository:**
+1. **Click "GitLab"** as your Git provider
+2. **Click "Continue"**
+3. **Authorize AWS Amplify:**
+   - You'll be redirected to GitLab
+   - Click "Authorize" to allow AWS Amplify access
+   - You'll be redirected back to AWS Console
+
+4. **Select Repository:**
+   - **Repository:** Select your EMP UI repository from dropdown
+   - **Branch:** Select `main` or `master` branch
+   - **Click "Next"**
+
+#### **1.3 Configure App Settings:**
+1. **App name:** Enter `emp-ui-app`
+2. **Environment name:** Enter `production`
+3. **Select existing service role** OR **Create new role**
+4. **Click "Next"**
+
+### **⌨️ CLI Method (Advanced Users):**
 ```bash
 # Create Amplify app connected to GitLab
 aws amplify create-app \
@@ -36,36 +51,51 @@ aws amplify create-app \
 
 ---
 
-## ⚙️ **Step 2: Configure Build Settings (15 minutes)**
+## ⚙️ **Step 2: Configure Build Settings**
 
-### **Auto-Detected Build Settings:**
-Amplify will automatically detect your frontend framework and suggest build settings.
+### **🖱️ Console Method:**
 
-### **Custom Build Configuration (amplify.yml):**
-Create `amplify.yml` in your repository root:
+#### **2.1 Review Build Settings:**
+1. **Amplify will auto-detect** your frontend framework (React, Vue, Angular, etc.)
+2. **Review the suggested build commands:**
+   - **Build command:** `npm run build`
+   - **Base directory:** `/` (root of repository)
+   - **Build output directory:** `build` or `dist`
 
-```yaml
-version: 1
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - npm ci
-    build:
-      commands:
-        - npm run build
-  artifacts:
-    baseDirectory: dist  # or build/ for React
-    files:
-      - '**/*'
-  cache:
-    paths:
-      - node_modules/**/*
-```
+#### **2.2 Customize Build Settings (if needed):**
+1. **Click "Edit"** next to build settings
+2. **Modify build specification:**
+   ```yaml
+   version: 1
+   frontend:
+     phases:
+       preBuild:
+         commands:
+           - npm ci
+       build:
+         commands:
+           - npm run build
+     artifacts:
+       baseDirectory: build
+       files:
+         - '**/*'
+     cache:
+       paths:
+         - node_modules/**/*
+   ```
+3. **Click "Save"**
 
-### **Environment Variables:**
+#### **2.3 Environment Variables:**
+1. **Click "Environment variables"** tab
+2. **Click "Add variable"**
+3. **Add variables:**
+   - **Key:** `REACT_APP_API_GATEWAY_URL`
+   - **Value:** `https://your-api-gateway-alb-dns-name`
+4. **Click "Save"**
+
+### **⌨️ CLI Method:**
 ```bash
-# Set environment variables via console or CLI
+# Set environment variables via CLI
 aws amplify put-backend-environment \
   --app-id YOUR_APP_ID \
   --environment-name production \
@@ -78,9 +108,32 @@ aws amplify put-backend-environment \
 
 ---
 
-## 🌿 **Step 3: Configure Branch Deployment (10 minutes)**
+## 🌿 **Step 3: Configure Branch Deployment**
 
-### **Production Branch (main):**
+### **🖱️ Console Method:**
+
+#### **3.1 Review and Deploy:**
+1. **Review all settings** on the final page
+2. **Click "Save and deploy"**
+3. **Wait for initial deployment** (5-10 minutes)
+
+#### **3.2 Add Additional Branches:**
+1. **Go to your Amplify app** → Click on app name
+2. **Click "Connect branch"** button
+3. **Select branch:** Choose `develop` or `staging`
+4. **Configure settings:**
+   - **Environment:** `staging`
+   - **Build settings:** Same as production or customize
+5. **Click "Save and deploy"**
+
+#### **3.3 Branch Settings:**
+1. **Click on branch name** (e.g., `main`)
+2. **Configure branch settings:**
+   - **Auto build:** Toggle ON for automatic deployments
+   - **Pull request previews:** Toggle ON for PR previews
+   - **Environment variables:** Add branch-specific variables
+
+### **⌨️ CLI Method:**
 ```bash
 # Create production branch deployment
 aws amplify create-branch \
@@ -89,10 +142,7 @@ aws amplify create-branch \
   --framework "React" \
   --enable-auto-build \
   --region ap-southeast-1
-```
 
-### **Staging Branch (develop):**
-```bash
 # Create staging branch deployment
 aws amplify create-branch \
   --app-id YOUR_APP_ID \
@@ -102,16 +152,47 @@ aws amplify create-branch \
   --region ap-southeast-1
 ```
 
-### **Branch Settings:**
-- **Production (main):** Auto-deploy enabled
-- **Staging (develop):** Auto-deploy enabled with preview URL
-- **Feature branches:** Manual deploy or auto-preview
-
 ---
 
-## 🔧 **Step 4: Advanced Configuration (15 minutes)**
+## 🔧 **Step 4: Advanced Configuration**
 
-### **Custom Domain Setup:**
+### **🖱️ Console Method:**
+
+#### **4.1 Custom Domain Setup:**
+1. **Go to App settings** → **Domain management**
+2. **Click "Add domain"**
+3. **Enter domain:** `emp-portal.yourdomain.com`
+4. **Configure subdomains:**
+   - **Subdomain:** `www` → **Branch:** `main`
+   - **Subdomain:** `staging` → **Branch:** `develop`
+5. **Click "Save"**
+6. **Wait for SSL certificate** provisioning (15-30 minutes)
+
+#### **4.2 Access Control (Password Protection):**
+1. **Go to App settings** → **Access control**
+2. **Select branch** (e.g., `develop` for staging)
+3. **Toggle "Restrict access"** ON
+4. **Set credentials:**
+   - **Username:** `staging`
+   - **Password:** `your-secure-password`
+5. **Click "Save"**
+
+#### **4.3 Build Notifications:**
+1. **Go to App settings** → **Notifications**
+2. **Click "Add notification"**
+3. **Configure notification:**
+   - **Event:** Build succeeds/fails
+   - **Target:** Email or SNS topic
+   - **Recipients:** Your email address
+4. **Click "Save"**
+
+#### **4.4 Monitoring and Logs:**
+1. **Go to Monitoring** tab
+2. **View build history** and deployment status
+3. **Click on build** to see detailed logs
+4. **Monitor performance** metrics
+
+### **⌨️ CLI Method:**
 ```bash
 # Add custom domain
 aws amplify create-domain-association \
@@ -122,20 +203,7 @@ aws amplify create-domain-association \
     "branchName": "main"
   }' \
   --region ap-southeast-1
-```
 
-### **Build Notifications:**
-```bash
-# Set up SNS notifications for build status
-aws amplify put-webhook \
-  --app-id YOUR_APP_ID \
-  --branch-name main \
-  --description "Build notifications" \
-  --region ap-southeast-1
-```
-
-### **Access Control:**
-```bash
 # Enable password protection for staging
 aws amplify update-branch \
   --app-id YOUR_APP_ID \
@@ -147,14 +215,38 @@ aws amplify update-branch \
 
 ---
 
-## 🎯 **Step 5: Test CI/CD Pipeline (10 minutes)**
+## 🎯 **Step 5: Test CI/CD Pipeline**
 
-### **Trigger First Deployment:**
-1. **Make a code change** in your GitLab repository
+### **🖱️ Console Method:**
+
+#### **5.1 Monitor First Deployment:**
+1. **Go to your Amplify app** in console
+2. **Click on branch** (e.g., `main`)
+3. **Watch build progress:**
+   - **Provision:** Setting up build environment
+   - **Build:** Running build commands
+   - **Deploy:** Uploading to CDN
+   - **Verify:** Final checks
+
+#### **5.2 Test Manual Deployment:**
+1. **Click "Redeploy this version"** button
+2. **Monitor build logs** in real-time
+3. **Check deployment status**
+
+#### **5.3 Test Automatic Deployment:**
+1. **Make a code change** in GitLab
 2. **Commit and push** to main branch
-3. **Monitor build** in Amplify console
+3. **Go to Amplify console**
+4. **Watch automatic build** trigger
+5. **Monitor build progress**
 
-### **Verify Build Process:**
+#### **5.4 Access Your Application:**
+1. **Copy the app URL** from Amplify console
+2. **Format:** `https://main.d1234567890.amplifyapp.com`
+3. **Test in browser**
+4. **Verify API calls** work correctly
+
+### **⌨️ CLI Method:**
 ```bash
 # Check build status
 aws amplify list-jobs \
@@ -168,11 +260,39 @@ aws amplify get-job \
   --branch-name main \
   --job-id YOUR_JOB_ID \
   --region ap-southeast-1
+
+# Start manual deployment
+aws amplify start-job \
+  --app-id YOUR_APP_ID \
+  --branch-name main \
+  --job-type RELEASE \
+  --region ap-southeast-1
 ```
 
-### **Test Deployment:**
-- **Production URL:** `https://main.YOUR_APP_ID.amplifyapp.com`
-- **Staging URL:** `https://develop.YOUR_APP_ID.amplifyapp.com`
+---
+
+## 📱 **Console Navigation Quick Reference**
+
+### **Main Amplify Console Sections:**
+1. **All apps** - List of all Amplify applications
+2. **App dashboard** - Overview of specific app
+3. **Branches** - Manage branch deployments
+4. **Deployments** - Build history and logs
+5. **Monitoring** - Performance metrics
+6. **App settings** - Configuration options
+
+### **Key Console Actions:**
+- **Deploy branch:** Manual deployment trigger
+- **Connect branch:** Add new branch for deployment
+- **Edit build settings:** Modify build configuration
+- **Add domain:** Custom domain setup
+- **Set environment variables:** App configuration
+- **View logs:** Troubleshoot build issues
+
+### **Console URLs:**
+- **Main Console:** `https://console.aws.amazon.com/amplify/`
+- **App Dashboard:** `https://console.aws.amazon.com/amplify/home#/YOUR_APP_ID`
+- **Build Logs:** `https://console.aws.amazon.com/amplify/home#/YOUR_APP_ID/YourBranch/deployments`
 
 ---
 
