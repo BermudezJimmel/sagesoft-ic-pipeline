@@ -7,6 +7,18 @@
 GitLab → CodePipeline → CodeBuild → ECR → CodeDeploy → ECS (Blue/Green) → Internal ALB
 ```
 
+### **✅ WORKING PIPELINE FLOW:**
+```
+1. Source (GitLab) → 2. Build (CodeBuild) → 3. Deploy (ECS Staging) → 4. Manual Approval → 5. Deploy-to-Production (ECS Blue/Green)
+```
+
+### **🎯 5 Microservices:**
+- **API Gateway** (port 8000)
+- **AUTH** (port 8001) 
+- **COREv3** (port 8002)
+- **EMP PORTAL** (Amplify-based, different from EMP UI)
+- **FILES** (port 8003)
+
 ---
 
 ## 🎯 **Key Success Factors:**
@@ -76,19 +88,49 @@ family: ic-api-gateway-production-task
 containerPort: 8000
 ```
 
-### **CORE Service:**
+### **COREv3 Service:**
 ```yaml
 # buildspec.yml
-APP_NAME: ic-core-image
-CONTAINER_NAME: ic-core-container
+APP_NAME: ic-corev3-image
+CONTAINER_NAME: ic-corev3-container
 
 # appspec.yml
-ContainerName: ic-core-container  
+ContainerName: ic-corev3-container  
 ContainerPort: 8002
 
 # taskdef.json
-family: ic-core-production-task
+family: ic-corev3-production-task
 containerPort: 8002
+```
+
+### **EMP PORTAL Service:**
+```yaml
+# buildspec.yml
+APP_NAME: ic-emp-portal-image
+CONTAINER_NAME: ic-emp-portal-container
+
+# appspec.yml
+ContainerName: ic-emp-portal-container  
+ContainerPort: 80
+
+# taskdef.json
+family: ic-emp-portal-production-task
+containerPort: 80
+```
+
+### **FILES Service:**
+```yaml
+# buildspec.yml
+APP_NAME: ic-files-image
+CONTAINER_NAME: ic-files-container
+
+# appspec.yml
+ContainerName: ic-files-container  
+ContainerPort: 8003
+
+# taskdef.json
+family: ic-files-production-task
+containerPort: 8003
 ```
 
 ---

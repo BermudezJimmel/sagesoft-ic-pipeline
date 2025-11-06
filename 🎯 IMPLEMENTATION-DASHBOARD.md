@@ -1,10 +1,15 @@
 # 🎯 IC Microservices CI/CD Implementation Dashboard
 
 ## 📊 Project Overview
-**Goal:** Implement CI/CD for 4 microservices with Load Balancer and Service Connect  
+**Goal:** Implement CI/CD for 5 microservices with Load Balancer and Service Connect  
 **Timeline:** 3 Days  
-**Services:** API Gateway (8000), AUTH (8001), CORE (8002), FILES (8003)  
-**Architecture:** GitLab → CodePipeline → ECR → ECS Fargate → ALB → Service Connect
+**Services:** API Gateway (8000), AUTH (8001), COREv3 (8002), EMP PORTAL (Amplify), FILES (8003)  
+**Architecture:** GitLab → CodePipeline → CodeBuild → ECR → ECS Fargate → ALB → Service Connect
+
+**✅ WORKING PIPELINE FLOW:**
+```
+Source (GitLab) → Build (CodeBuild) → Deploy (ECS Staging) → Manual Approval → Deploy-to-Production (ECS Blue/Green)
+```
 
 ---
 
@@ -79,7 +84,10 @@ New: ALB → API Gateway → Service Connect → Microservices ✅
 - Service Connect Namespace: `ic-api-services-namespace`
 - API Gateway Service: Running with Service Connect
 - AUTH Service: Running with Service Connect
-- CORE Service: Running with Blue/Green deployment setup
+- COREv3 Service: Running with Blue/Green deployment setup
+- EMP PORTAL: Amplify-based (separate from EMP UI)
+- FILES Service: Running with Service Connect
+- **✅ WORKING PIPELINE:** Source → Build → Deploy → Approval → Production (Blue/Green)
 
 ### **⚠️ Current Issues (Day 3):**
 1. ✅ **RESOLVED:** Internal ALB Configuration (was selecting Internet-facing instead of Internal)

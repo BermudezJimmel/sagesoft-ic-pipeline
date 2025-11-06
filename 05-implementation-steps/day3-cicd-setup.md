@@ -6,7 +6,12 @@
 - ✅ ECS services running with Service Connect
 - ✅ ALB configured and healthy
 - ✅ Service-to-service communication working
-- ✅ All microservices deployed manually
+- ✅ All 5 microservices deployed: API Gateway, AUTH, COREv3, EMP PORTAL (Amplify), FILES
+
+**✅ WORKING PIPELINE ARCHITECTURE:**
+```
+GitLab Source → CodeBuild → ECS Deploy (Staging) → Manual Approval → ECS Blue/Green (Production)
+```
 
 ## Step 0: Create Internal ALB for CORE Service (CRITICAL)
 
@@ -162,10 +167,11 @@ echo "Pipeline bucket: $PIPELINE_BUCKET"
 **⚠️ IMPORTANT:** Create ECR repositories for all microservices first.
 
 ```bash
-# Create ECR repositories for all services
+# Create ECR repositories for all 5 microservices
 aws ecr create-repository --repository-name ic-api-gateway-image --region ap-southeast-1
 aws ecr create-repository --repository-name ic-auth-image --region ap-southeast-1  
-aws ecr create-repository --repository-name ic-core-image --region ap-southeast-1
+aws ecr create-repository --repository-name ic-corev3-image --region ap-southeast-1
+aws ecr create-repository --repository-name ic-emp-portal-image --region ap-southeast-1
 aws ecr create-repository --repository-name ic-files-image --region ap-southeast-1
 ```
 
