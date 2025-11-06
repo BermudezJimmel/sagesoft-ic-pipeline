@@ -48,11 +48,14 @@ Current: ECS Fargate (Public IPs) ❌
 New: ALB → API Gateway → Service Connect → Microservices ✅
 ```
 
-### **3. Service Connect Benefits (5 minutes)**
+### **3. Service Connect + Internal ALB Benefits (5 minutes)**
 **Show:** [Service Connect Guide](./04-service-connect-guide/service-connect-explained.md)
-- 50% cost reduction (no internal ALB)
-- Automatic service discovery
-- Secure internal communication
+- **Service Connect:** Service discovery and internal communication
+- **Internal ALB:** Load balancing and Blue/Green deployments  
+- **Security:** VPC-only communication, no internet exposure
+- **Zero Downtime:** Health checks and proper traffic distribution
+
+**⚠️ Important:** Service Connect provides DNS resolution, Internal ALB provides load balancing
 
 ### **4. Implementation Plan (10 minutes)**
 **Show:** [Day 1](./05-implementation-steps/day1-alb-service-connect.md) + [Day 2](./05-implementation-steps/day2-complete-setup.md) + [Day 3](./05-implementation-steps/day3-cicd-setup.md)
@@ -65,6 +68,29 @@ New: ALB → API Gateway → Service Connect → Microservices ✅
 - VPC/Subnet IDs needed
 - GitLab repository URLs
 - Database schema names
+
+---
+
+## 🔥 **CURRENT IMPLEMENTATION STATUS**
+
+### **✅ Completed:**
+- ECS Cluster: `ic-general-services-cluster` 
+- Service Connect Namespace: `ic-api-services-namespace`
+- API Gateway Service: Running with Service Connect
+- AUTH Service: Running with Service Connect
+- CORE Service: Running with Blue/Green deployment setup
+
+### **⚠️ Current Issues (Day 3):**
+1. **Internal ALB Configuration:** CORE service needs internal ALB for secure communication
+2. **CodeDeploy Error:** "Primary taskset target group must be behind listener" 
+3. **Security Groups:** NAT Gateway IP vs VPC CIDR for ALB access
+4. **Architecture Decision:** Service Connect (discovery) + Internal ALB (load balancing)
+
+### **🎯 Next Steps:**
+1. Fix internal ALB listener configuration with blue/green target groups
+2. Update CodeDeploy deployment group to use internal ALB
+3. Test API Gateway → Internal CORE ALB communication
+4. Proceed with CI/CD pipeline setup
 
 ---
 
@@ -97,6 +123,9 @@ aws codepipeline create-pipeline --cli-input-json file://api-gateway-pipeline.js
 
 | Issue | Solution File | Quick Fix |
 |-------|---------------|-----------|
+| **🔥 CURRENT:** Internal ALB CodeDeploy error | [Day 3 Guide](./05-implementation-steps/day3-cicd-setup.md) | Configure target groups in internal ALB listener |
+| **🔥 CURRENT:** API Gateway → CORE ALB 504 error | [Security Group Guide](./CLIENT-INFRASTRUCTURE-VALUES.md) | Use NAT Gateway IP in ALB security group |
+| **🔥 CURRENT:** Service Connect vs ALB confusion | [Service Connect Guide](./04-service-connect-guide/service-connect-explained.md) | Service Connect = Discovery, ALB = Load Balancing |
 | Service Connect not working | [Service Connect Guide](./04-service-connect-guide/service-connect-explained.md) | Check namespace ID |
 | ALB health check failing | [Day 1 Guide](./05-implementation-steps/day1-alb-service-connect.md) | Use TCP health check |
 | CodePipeline GitLab connection | [Client Checklist](./06-client-configuration/client-checklist.md) | OAuth setup required |
@@ -113,12 +142,16 @@ aws codepipeline create-pipeline --cli-input-json file://api-gateway-pipeline.js
 - [ ] API Gateway registered in Service Connect
 
 ### **Day 2 Success Criteria**
-- [ ] All 4 services using Service Connect
-- [ ] Services communicate via .local DNS (✅ **COMPLETED**)
-- [ ] Service Connect DNS resolution working (✅ **FIXED**)
-- [ ] ALB target group health checks passing
+- [✅] All 4 services using Service Connect
+- [✅] Services communicate via .local DNS 
+- [✅] Service Connect DNS resolution working
+- [⚠️] **CURRENT ISSUE:** Internal ALB configuration for CORE service
+- [⚠️] **CURRENT ISSUE:** CodeDeploy Blue/Green with internal ALB
+- [⚠️] **CURRENT ISSUE:** NAT Gateway IP vs VPC CIDR security groups
 
 ### **Day 3 Success Criteria**
+- [⏳] **IN PROGRESS:** Internal ALB setup for secure communication
+- [⏳] **BLOCKED:** CodeDeploy configuration with internal ALB
 - [ ] CodePipeline and CodeBuild IAM roles created
 - [ ] CodeBuild projects for all services created
 - [ ] CodePipeline created for all services
